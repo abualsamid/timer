@@ -1,0 +1,15 @@
+{
+  "dev": {
+    "awscloudformation": {
+      "AuthRoleName": "amplify-timer-dev-173035-authRole",
+      "UnauthRoleArn": "arn:aws:iam::832947537436:role/amplify-timer-dev-173035-unauthRole",
+      "AuthRoleArn": "arn:aws:iam::832947537436:role/amplify-timer-dev-173035-authRole",
+      "Region": "us-east-1",
+      "DeploymentBucketName": "amplify-timer-dev-173035-deployment",
+      "UnauthRoleName": "amplify-timer-dev-173035-unauthRole",
+      "StackName": "amplify-timer-dev-173035",
+      "StackId": "arn:aws:cloudformation:us-east-1:832947537436:stack/amplify-timer-dev-173035/423113c0-73cb-11eb-b722-0e43f2110cc5",
+      "AmplifyAppId": "d374irosixtjg6"
+    }
+  }
+}
