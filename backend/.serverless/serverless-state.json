@@ -20,6 +20,22 @@
         "service": "timer"
       },
       "memorySize": 512,
+      "iamRoleStatements": [
+        {
+          "Effect": "Allow",
+          "Resource": {
+            "Fn::GetAtt": [
+              "DynamoTable",
+              "Arn"
+            ]
+          },
+          "Action": [
+            "dynamodb:PartiQLSelect",
+            "dynamodb:PartiQLInsert",
+            "dynamodb:PartiQLUpdate"
+          ]
+        }
+      ],
       "httpApi": {
         "payload": "2.0",
         "cors": true,
@@ -122,6 +138,12 @@
               }
             }
           },
+          "GetAthletesLogGroup": {
+            "Type": "AWS::Logs::LogGroup",
+            "Properties": {
+              "LogGroupName": "/aws/lambda/timer-dev-getAthletes"
+            }
+          },
           "GetTimesLogGroup": {
             "Type": "AWS::Logs::LogGroup",
             "Properties": {
@@ -138,6 +160,12 @@
             "Type": "AWS::Logs::LogGroup",
             "Properties": {
               "LogGroupName": "/aws/lambda/timer-dev-createEvent"
+            }
+          },
+          "AddAthleteLogGroup": {
+            "Type": "AWS::Logs::LogGroup",
+            "Properties": {
+              "LogGroupName": "/aws/lambda/timer-dev-addAthlete"
             }
           },
           "CreateTimerLogGroup": {
@@ -214,6 +242,9 @@
                             "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/timer-dev*:*:*"
                           }
                         ]
+                      },
+                      {
+                        "$ref": "$[\"service\"][\"provider\"][\"iamRoleStatements\"][0]"
                       }
                     ]
                   }
@@ -235,6 +266,46 @@
               }
             }
           },
+          "GetAthletesLambdaFunction": {
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+              "Code": {
+                "S3Bucket": {
+                  "Ref": "ServerlessDeploymentBucket"
+                },
+                "S3Key": "serverless/timer/dev/1614483229568-2021-02-28T03:33:49.568Z/timer.zip"
+              },
+              "Handler": "functions/app.getAthletes",
+              "Runtime": "nodejs12.x",
+              "FunctionName": "timer-dev-getAthletes",
+              "MemorySize": 512,
+              "Timeout": 6,
+              "Tags": [
+                {
+                  "Key": "service",
+                  "Value": "timer"
+                }
+              ],
+              "Environment": {
+                "Variables": {
+                  "AWS_NODEJS_CONNECTION_REUSE_ENABLED": "1",
+                  "STAGE": "dev",
+                  "TableName": {
+                    "$ref": "$[\"service\"][\"provider\"][\"environment\"][\"TableName\"]"
+                  }
+                }
+              },
+              "Role": {
+                "Fn::GetAtt": [
+                  "IamRoleLambdaExecution",
+                  "Arn"
+                ]
+              }
+            },
+            "DependsOn": [
+              "GetAthletesLogGroup"
+            ]
+          },
           "GetTimesLambdaFunction": {
             "Type": "AWS::Lambda::Function",
             "Properties": {
@@ -242,7 +313,7 @@
                 "S3Bucket": {
                   "Ref": "ServerlessDeploymentBucket"
                 },
-                "S3Key": "serverless/timer/dev/1614391519434-2021-02-27T02:05:19.434Z/getTimes.zip"
+                "S3Key": "serverless/timer/dev/1614483229568-2021-02-28T03:33:49.568Z/timer.zip"
               },
               "Handler": "functions/app.getTimes",
               "Runtime": "nodejs12.x",
@@ -283,7 +354,7 @@
                 "S3Bucket": {
                   "Ref": "ServerlessDeploymentBucket"
                 },
-                "S3Key": "serverless/timer/dev/1614391519434-2021-02-27T02:05:19.434Z/getEvents.zip"
+                "S3Key": "serverless/timer/dev/1614483229568-2021-02-28T03:33:49.568Z/timer.zip"
               },
               "Handler": "functions/app.getEvents",
               "Runtime": "nodejs12.x",
@@ -301,19 +372,18 @@
                   "AWS_NODEJS_CONNECTION_REUSE_ENABLED": "1",
                   "STAGE": "dev",
                   "TableName": {
-                    "Ref": "DynamoTable"
+                    "$ref": "$[\"service\"][\"provider\"][\"environment\"][\"TableName\"]"
                   }
                 }
               },
               "Role": {
                 "Fn::GetAtt": [
-                  "GetEventsIamRoleLambdaExecution",
+                  "IamRoleLambdaExecution",
                   "Arn"
                 ]
               }
             },
             "DependsOn": [
-              "GetEventsIamRoleLambdaExecution",
               "GetEventsLogGroup"
             ]
           },
@@ -324,7 +394,7 @@
                 "S3Bucket": {
                   "Ref": "ServerlessDeploymentBucket"
                 },
-                "S3Key": "serverless/timer/dev/1614391519434-2021-02-27T02:05:19.434Z/createEvent.zip"
+                "S3Key": "serverless/timer/dev/1614483229568-2021-02-28T03:33:49.568Z/timer.zip"
               },
               "Handler": "functions/app.createEvent",
               "Runtime": "nodejs12.x",
@@ -342,20 +412,59 @@
                   "AWS_NODEJS_CONNECTION_REUSE_ENABLED": "1",
                   "STAGE": "dev",
                   "TableName": {
-                    "Ref": "DynamoTable"
+                    "$ref": "$[\"service\"][\"provider\"][\"environment\"][\"TableName\"]"
                   }
                 }
               },
               "Role": {
                 "Fn::GetAtt": [
-                  "CreateEventIamRoleLambdaExecution",
+                  "IamRoleLambdaExecution",
                   "Arn"
                 ]
               }
             },
             "DependsOn": [
-              "CreateEventIamRoleLambdaExecution",
               "CreateEventLogGroup"
+            ]
+          },
+          "AddAthleteLambdaFunction": {
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+              "Code": {
+                "S3Bucket": {
+                  "Ref": "ServerlessDeploymentBucket"
+                },
+                "S3Key": "serverless/timer/dev/1614483229568-2021-02-28T03:33:49.568Z/timer.zip"
+              },
+              "Handler": "functions/app.addAthlete",
+              "Runtime": "nodejs12.x",
+              "FunctionName": "timer-dev-addAthlete",
+              "MemorySize": 512,
+              "Timeout": 6,
+              "Tags": [
+                {
+                  "Key": "service",
+                  "Value": "timer"
+                }
+              ],
+              "Environment": {
+                "Variables": {
+                  "AWS_NODEJS_CONNECTION_REUSE_ENABLED": "1",
+                  "STAGE": "dev",
+                  "TableName": {
+                    "$ref": "$[\"service\"][\"provider\"][\"environment\"][\"TableName\"]"
+                  }
+                }
+              },
+              "Role": {
+                "Fn::GetAtt": [
+                  "IamRoleLambdaExecution",
+                  "Arn"
+                ]
+              }
+            },
+            "DependsOn": [
+              "AddAthleteLogGroup"
             ]
           },
           "CreateTimerLambdaFunction": {
@@ -365,7 +474,7 @@
                 "S3Bucket": {
                   "Ref": "ServerlessDeploymentBucket"
                 },
-                "S3Key": "serverless/timer/dev/1614391519434-2021-02-27T02:05:19.434Z/createTimer.zip"
+                "S3Key": "serverless/timer/dev/1614483229568-2021-02-28T03:33:49.568Z/timer.zip"
               },
               "Handler": "functions/app.createTimer",
               "Runtime": "nodejs12.x",
@@ -406,7 +515,7 @@
                 "S3Bucket": {
                   "Ref": "ServerlessDeploymentBucket"
                 },
-                "S3Key": "serverless/timer/dev/1614391519434-2021-02-27T02:05:19.434Z/myProfile.zip"
+                "S3Key": "serverless/timer/dev/1614483229568-2021-02-28T03:33:49.568Z/timer.zip"
               },
               "Handler": "functions/app.myProfile",
               "Runtime": "nodejs12.x",
@@ -447,7 +556,7 @@
                 "S3Bucket": {
                   "Ref": "ServerlessDeploymentBucket"
                 },
-                "S3Key": "serverless/timer/dev/1614391519434-2021-02-27T02:05:19.434Z/ConfirmUserSignUp.zip"
+                "S3Key": "serverless/timer/dev/1614483229568-2021-02-28T03:33:49.568Z/timer.zip"
               },
               "Handler": "functions/confirm-user-signup.handler",
               "Runtime": "nodejs12.x",
@@ -481,64 +590,84 @@
               "ConfirmUserSignUpLogGroup"
             ]
           },
-          "GetTimesLambdaVersionZ3vaJeGHx5tKNOQK4ol1OX1nbWF6USAyD7bTjzQ": {
+          "GetAthletesLambdaVersionbrp9JKlg5BIrHnZG7RRcrqB3IE9jb7xtgmWlYUt6w": {
+            "Type": "AWS::Lambda::Version",
+            "DeletionPolicy": "Retain",
+            "Properties": {
+              "FunctionName": {
+                "Ref": "GetAthletesLambdaFunction"
+              },
+              "CodeSha256": "8nSgFQ5MWn2N4nxM7jBxeNgt5RIbBdGAHeFdcVmlGKA="
+            }
+          },
+          "GetTimesLambdaVersionowNApSr6dykWXbWzp57UTT7LQrtkYJQCAATXPdZnP8": {
             "Type": "AWS::Lambda::Version",
             "DeletionPolicy": "Retain",
             "Properties": {
               "FunctionName": {
                 "Ref": "GetTimesLambdaFunction"
               },
-              "CodeSha256": "P/ewEBSCnaPVL9YUs18j162b4sMZzRFHiUl2IYGTIjU="
+              "CodeSha256": "8nSgFQ5MWn2N4nxM7jBxeNgt5RIbBdGAHeFdcVmlGKA="
             }
           },
-          "GetEventsLambdaVersion97P9htlET8FuCWqm9X2KArfDiiGxBiWDMde8mkmACc": {
-            "Type": "AWS::Lambda::Version",
-            "DeletionPolicy": "Retain",
-            "Properties": {
-              "FunctionName": {
-                "Ref": "GetEventsLambdaFunction"
-              },
-              "CodeSha256": "P/ewEBSCnaPVL9YUs18j162b4sMZzRFHiUl2IYGTIjU="
-            }
-          },
-          "CreateTimerLambdaVersionK3x1gfUOXbOKAIsNyPcuDSpDDDL0ZuWjUtQXyhTCJg": {
-            "Type": "AWS::Lambda::Version",
-            "DeletionPolicy": "Retain",
-            "Properties": {
-              "FunctionName": {
-                "Ref": "CreateTimerLambdaFunction"
-              },
-              "CodeSha256": "P/ewEBSCnaPVL9YUs18j162b4sMZzRFHiUl2IYGTIjU="
-            }
-          },
-          "CreateEventLambdaVersion2ozcUxdH61OMTXebvVsTyKgwsKvUamAD1p8NTkAH9w": {
+          "CreateEventLambdaVersionpVEcY1bVxR1rEjh59cPh8LnbdNkJGdmg2tYiX9u08": {
             "Type": "AWS::Lambda::Version",
             "DeletionPolicy": "Retain",
             "Properties": {
               "FunctionName": {
                 "Ref": "CreateEventLambdaFunction"
               },
-              "CodeSha256": "P/ewEBSCnaPVL9YUs18j162b4sMZzRFHiUl2IYGTIjU="
+              "CodeSha256": "8nSgFQ5MWn2N4nxM7jBxeNgt5RIbBdGAHeFdcVmlGKA="
             }
           },
-          "MyProfileLambdaVersionFBizDqacC7RlqrCyXyNp1EXrKr0PQsT8uS2uQTlRolM": {
+          "AddAthleteLambdaVersionwsbFuLdhhuwMJd3rnVWlo2jFHIReJO5qPziqEg2M": {
+            "Type": "AWS::Lambda::Version",
+            "DeletionPolicy": "Retain",
+            "Properties": {
+              "FunctionName": {
+                "Ref": "AddAthleteLambdaFunction"
+              },
+              "CodeSha256": "8nSgFQ5MWn2N4nxM7jBxeNgt5RIbBdGAHeFdcVmlGKA="
+            }
+          },
+          "GetEventsLambdaVersionQ4A7gndjGvz7WJQSkXOmKBDJFaGo04SD2h47WZEeDY": {
+            "Type": "AWS::Lambda::Version",
+            "DeletionPolicy": "Retain",
+            "Properties": {
+              "FunctionName": {
+                "Ref": "GetEventsLambdaFunction"
+              },
+              "CodeSha256": "8nSgFQ5MWn2N4nxM7jBxeNgt5RIbBdGAHeFdcVmlGKA="
+            }
+          },
+          "MyProfileLambdaVersionRvCBISZ9F0DFxqHouT8mMR4yj3CN87289UyJg0RoDc": {
             "Type": "AWS::Lambda::Version",
             "DeletionPolicy": "Retain",
             "Properties": {
               "FunctionName": {
                 "Ref": "MyProfileLambdaFunction"
               },
-              "CodeSha256": "P/ewEBSCnaPVL9YUs18j162b4sMZzRFHiUl2IYGTIjU="
+              "CodeSha256": "8nSgFQ5MWn2N4nxM7jBxeNgt5RIbBdGAHeFdcVmlGKA="
             }
           },
-          "ConfirmUserSignUpLambdaVersionSM2U32Zc6NZNbZbQVhGAYVdghGOsSz7ypXJOc6SxVN4": {
+          "ConfirmUserSignUpLambdaVersiongCWlIeXRyFECYb1NkKHS6pzwKdPZ2LhdkBYkrKlhm9c": {
             "Type": "AWS::Lambda::Version",
             "DeletionPolicy": "Retain",
             "Properties": {
               "FunctionName": {
                 "Ref": "ConfirmUserSignUpLambdaFunction"
               },
-              "CodeSha256": "P/ewEBSCnaPVL9YUs18j162b4sMZzRFHiUl2IYGTIjU="
+              "CodeSha256": "8nSgFQ5MWn2N4nxM7jBxeNgt5RIbBdGAHeFdcVmlGKA="
+            }
+          },
+          "CreateTimerLambdaVersionPQ0COiAWt0R7a8sCwgTi2Xz0XF1DvSTcpWw09zDhCzo": {
+            "Type": "AWS::Lambda::Version",
+            "DeletionPolicy": "Retain",
+            "Properties": {
+              "FunctionName": {
+                "Ref": "CreateTimerLambdaFunction"
+              },
+              "CodeSha256": "8nSgFQ5MWn2N4nxM7jBxeNgt5RIbBdGAHeFdcVmlGKA="
             }
           },
           "HttpApi": {
@@ -604,6 +733,82 @@
               },
               "Name": "serviceAuthorizer"
             }
+          },
+          "GetAthletesLambdaPermissionHttpApi": {
+            "Type": "AWS::Lambda::Permission",
+            "Properties": {
+              "FunctionName": {
+                "Fn::GetAtt": [
+                  "GetAthletesLambdaFunction",
+                  "Arn"
+                ]
+              },
+              "Action": "lambda:InvokeFunction",
+              "Principal": "apigateway.amazonaws.com",
+              "SourceArn": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:",
+                    {
+                      "Ref": "AWS::Partition"
+                    },
+                    ":execute-api:",
+                    {
+                      "Ref": "AWS::Region"
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId"
+                    },
+                    ":",
+                    {
+                      "Ref": "HttpApi"
+                    },
+                    "/*"
+                  ]
+                ]
+              }
+            }
+          },
+          "HttpApiIntegrationGetAthletes": {
+            "Type": "AWS::ApiGatewayV2::Integration",
+            "Properties": {
+              "ApiId": {
+                "Ref": "HttpApi"
+              },
+              "IntegrationType": "AWS_PROXY",
+              "IntegrationUri": {
+                "$ref": "$[\"service\"][\"provider\"][\"compiledCloudFormationTemplate\"][\"Resources\"][\"GetAthletesLambdaPermissionHttpApi\"][\"Properties\"][\"FunctionName\"]"
+              },
+              "PayloadFormatVersion": "2.0",
+              "TimeoutInMillis": 6500
+            }
+          },
+          "HttpApiRouteGetGetathletes": {
+            "Type": "AWS::ApiGatewayV2::Route",
+            "Properties": {
+              "ApiId": {
+                "Ref": "HttpApi"
+              },
+              "RouteKey": "GET /getAthletes",
+              "Target": {
+                "Fn::Join": [
+                  "/",
+                  [
+                    "integrations",
+                    {
+                      "Ref": "HttpApiIntegrationGetAthletes"
+                    }
+                  ]
+                ]
+              },
+              "AuthorizationType": "JWT",
+              "AuthorizerId": {
+                "Ref": "HttpApiAuthorizerServiceAuthorizer"
+              }
+            },
+            "DependsOn": "HttpApiIntegrationGetAthletes"
           },
           "GetTimesLambdaPermissionHttpApi": {
             "Type": "AWS::Lambda::Permission",
@@ -833,6 +1038,82 @@
             },
             "DependsOn": "HttpApiIntegrationCreateEvent"
           },
+          "AddAthleteLambdaPermissionHttpApi": {
+            "Type": "AWS::Lambda::Permission",
+            "Properties": {
+              "FunctionName": {
+                "Fn::GetAtt": [
+                  "AddAthleteLambdaFunction",
+                  "Arn"
+                ]
+              },
+              "Action": "lambda:InvokeFunction",
+              "Principal": "apigateway.amazonaws.com",
+              "SourceArn": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:",
+                    {
+                      "Ref": "AWS::Partition"
+                    },
+                    ":execute-api:",
+                    {
+                      "Ref": "AWS::Region"
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId"
+                    },
+                    ":",
+                    {
+                      "Ref": "HttpApi"
+                    },
+                    "/*"
+                  ]
+                ]
+              }
+            }
+          },
+          "HttpApiIntegrationAddAthlete": {
+            "Type": "AWS::ApiGatewayV2::Integration",
+            "Properties": {
+              "ApiId": {
+                "Ref": "HttpApi"
+              },
+              "IntegrationType": "AWS_PROXY",
+              "IntegrationUri": {
+                "$ref": "$[\"service\"][\"provider\"][\"compiledCloudFormationTemplate\"][\"Resources\"][\"AddAthleteLambdaPermissionHttpApi\"][\"Properties\"][\"FunctionName\"]"
+              },
+              "PayloadFormatVersion": "2.0",
+              "TimeoutInMillis": 6500
+            }
+          },
+          "HttpApiRoutePostAthlete": {
+            "Type": "AWS::ApiGatewayV2::Route",
+            "Properties": {
+              "ApiId": {
+                "Ref": "HttpApi"
+              },
+              "RouteKey": "POST /athlete",
+              "Target": {
+                "Fn::Join": [
+                  "/",
+                  [
+                    "integrations",
+                    {
+                      "Ref": "HttpApiIntegrationAddAthlete"
+                    }
+                  ]
+                ]
+              },
+              "AuthorizationType": "JWT",
+              "AuthorizerId": {
+                "Ref": "HttpApiAuthorizerServiceAuthorizer"
+              }
+            },
+            "DependsOn": "HttpApiIntegrationAddAthlete"
+          },
           "CreateTimerLambdaPermissionHttpApi": {
             "Type": "AWS::Lambda::Permission",
             "Properties": {
@@ -1056,168 +1337,6 @@
                     "timer",
                     "dev",
                     "getTimes",
-                    {
-                      "Ref": "AWS::Region"
-                    },
-                    "lambdaRole"
-                  ]
-                ]
-              },
-              "ManagedPolicyArns": []
-            }
-          },
-          "GetEventsIamRoleLambdaExecution": {
-            "Type": "AWS::IAM::Role",
-            "Properties": {
-              "AssumeRolePolicyDocument": {
-                "Version": "2012-10-17",
-                "Statement": [
-                  {
-                    "Effect": "Allow",
-                    "Principal": {
-                      "Service": [
-                        "lambda.amazonaws.com"
-                      ]
-                    },
-                    "Action": [
-                      "sts:AssumeRole"
-                    ]
-                  }
-                ]
-              },
-              "Policies": [
-                {
-                  "PolicyName": {
-                    "Fn::Join": [
-                      "-",
-                      [
-                        "timer",
-                        "dev",
-                        "lambda"
-                      ]
-                    ]
-                  },
-                  "PolicyDocument": {
-                    "Version": "2012-10-17",
-                    "Statement": [
-                      {
-                        "Effect": "Allow",
-                        "Action": [
-                          "logs:CreateLogStream",
-                          "logs:CreateLogGroup",
-                          "logs:PutLogEvents"
-                        ],
-                        "Resource": [
-                          {
-                            "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/timer-dev-getEvents:*:*"
-                          }
-                        ]
-                      },
-                      {
-                        "Effect": "Allow",
-                        "Resource": {
-                          "Fn::GetAtt": [
-                            "DynamoTable",
-                            "Arn"
-                          ]
-                        },
-                        "Action": [
-                          "dynamodb:PartiQLSelect"
-                        ]
-                      }
-                    ]
-                  }
-                }
-              ],
-              "Path": "/",
-              "RoleName": {
-                "Fn::Join": [
-                  "-",
-                  [
-                    "timer",
-                    "dev",
-                    "getEvents",
-                    {
-                      "Ref": "AWS::Region"
-                    },
-                    "lambdaRole"
-                  ]
-                ]
-              },
-              "ManagedPolicyArns": []
-            }
-          },
-          "CreateEventIamRoleLambdaExecution": {
-            "Type": "AWS::IAM::Role",
-            "Properties": {
-              "AssumeRolePolicyDocument": {
-                "Version": "2012-10-17",
-                "Statement": [
-                  {
-                    "Effect": "Allow",
-                    "Principal": {
-                      "Service": [
-                        "lambda.amazonaws.com"
-                      ]
-                    },
-                    "Action": [
-                      "sts:AssumeRole"
-                    ]
-                  }
-                ]
-              },
-              "Policies": [
-                {
-                  "PolicyName": {
-                    "Fn::Join": [
-                      "-",
-                      [
-                        "timer",
-                        "dev",
-                        "lambda"
-                      ]
-                    ]
-                  },
-                  "PolicyDocument": {
-                    "Version": "2012-10-17",
-                    "Statement": [
-                      {
-                        "Effect": "Allow",
-                        "Action": [
-                          "logs:CreateLogStream",
-                          "logs:CreateLogGroup",
-                          "logs:PutLogEvents"
-                        ],
-                        "Resource": [
-                          {
-                            "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/timer-dev-createEvent:*:*"
-                          }
-                        ]
-                      },
-                      {
-                        "Effect": "Allow",
-                        "Action": [
-                          "dynamodb:PartiQLInsert"
-                        ],
-                        "Resource": {
-                          "Fn::GetAtt": [
-                            "DynamoTable",
-                            "Arn"
-                          ]
-                        }
-                      }
-                    ]
-                  }
-                }
-              ],
-              "Path": "/",
-              "RoleName": {
-                "Fn::Join": [
-                  "-",
-                  [
-                    "timer",
-                    "dev",
-                    "createEvent",
                     {
                       "Ref": "AWS::Region"
                     },
@@ -1621,40 +1740,52 @@
               "Ref": "ServerlessDeploymentBucket"
             }
           },
+          "GetAthletesLambdaFunctionQualifiedArn": {
+            "Description": "Current Lambda function version",
+            "Value": {
+              "Ref": "GetAthletesLambdaVersionbrp9JKlg5BIrHnZG7RRcrqB3IE9jb7xtgmWlYUt6w"
+            }
+          },
           "GetTimesLambdaFunctionQualifiedArn": {
             "Description": "Current Lambda function version",
             "Value": {
-              "Ref": "GetTimesLambdaVersionZ3vaJeGHx5tKNOQK4ol1OX1nbWF6USAyD7bTjzQ"
-            }
-          },
-          "GetEventsLambdaFunctionQualifiedArn": {
-            "Description": "Current Lambda function version",
-            "Value": {
-              "Ref": "GetEventsLambdaVersion97P9htlET8FuCWqm9X2KArfDiiGxBiWDMde8mkmACc"
-            }
-          },
-          "CreateTimerLambdaFunctionQualifiedArn": {
-            "Description": "Current Lambda function version",
-            "Value": {
-              "Ref": "CreateTimerLambdaVersionK3x1gfUOXbOKAIsNyPcuDSpDDDL0ZuWjUtQXyhTCJg"
+              "Ref": "GetTimesLambdaVersionowNApSr6dykWXbWzp57UTT7LQrtkYJQCAATXPdZnP8"
             }
           },
           "CreateEventLambdaFunctionQualifiedArn": {
             "Description": "Current Lambda function version",
             "Value": {
-              "Ref": "CreateEventLambdaVersion2ozcUxdH61OMTXebvVsTyKgwsKvUamAD1p8NTkAH9w"
+              "Ref": "CreateEventLambdaVersionpVEcY1bVxR1rEjh59cPh8LnbdNkJGdmg2tYiX9u08"
+            }
+          },
+          "AddAthleteLambdaFunctionQualifiedArn": {
+            "Description": "Current Lambda function version",
+            "Value": {
+              "Ref": "AddAthleteLambdaVersionwsbFuLdhhuwMJd3rnVWlo2jFHIReJO5qPziqEg2M"
+            }
+          },
+          "GetEventsLambdaFunctionQualifiedArn": {
+            "Description": "Current Lambda function version",
+            "Value": {
+              "Ref": "GetEventsLambdaVersionQ4A7gndjGvz7WJQSkXOmKBDJFaGo04SD2h47WZEeDY"
             }
           },
           "MyProfileLambdaFunctionQualifiedArn": {
             "Description": "Current Lambda function version",
             "Value": {
-              "Ref": "MyProfileLambdaVersionFBizDqacC7RlqrCyXyNp1EXrKr0PQsT8uS2uQTlRolM"
+              "Ref": "MyProfileLambdaVersionRvCBISZ9F0DFxqHouT8mMR4yj3CN87289UyJg0RoDc"
             }
           },
           "ConfirmUserSignUpLambdaFunctionQualifiedArn": {
             "Description": "Current Lambda function version",
             "Value": {
-              "Ref": "ConfirmUserSignUpLambdaVersionSM2U32Zc6NZNbZbQVhGAYVdghGOsSz7ypXJOc6SxVN4"
+              "Ref": "ConfirmUserSignUpLambdaVersiongCWlIeXRyFECYb1NkKHS6pzwKdPZ2LhdkBYkrKlhm9c"
+            }
+          },
+          "CreateTimerLambdaFunctionQualifiedArn": {
+            "Description": "Current Lambda function version",
+            "Value": {
+              "Ref": "CreateTimerLambdaVersionPQ0COiAWt0R7a8sCwgTi2Xz0XF1DvSTcpWw09zDhCzo"
             }
           },
           "HttpApiId": {
@@ -1798,6 +1929,27 @@
     ],
     "pluginsData": {},
     "functions": {
+      "getAthletes": {
+        "handler": "functions/app.getAthletes",
+        "events": [
+          {
+            "httpApi": {
+              "method": "GET",
+              "path": "/getAthletes",
+              "authorizer": "serviceAuthorizer"
+            },
+            "resolvedMethod": "GET",
+            "resolvedPath": "/getAthletes"
+          }
+        ],
+        "name": "timer-dev-getAthletes",
+        "package": {},
+        "memory": 512,
+        "timeout": 6,
+        "runtime": "nodejs12.x",
+        "vpc": {},
+        "versionLogicalId": "GetAthletesLambdaVersionbrp9JKlg5BIrHnZG7RRcrqB3IE9jb7xtgmWlYUt6w"
+      },
       "getTimes": {
         "handler": "functions/app.getTimes",
         "events": [
@@ -1823,14 +1975,12 @@
           }
         ],
         "name": "timer-dev-getTimes",
-        "package": {
-          "artifact": "/Users/ahmad/src/github.com/abualsamid/timer/backend/.serverless/getTimes.zip"
-        },
+        "package": {},
         "memory": 512,
         "timeout": 6,
         "runtime": "nodejs12.x",
         "vpc": {},
-        "versionLogicalId": "GetTimesLambdaVersionZ3vaJeGHx5tKNOQK4ol1OX1nbWF6USAyD7bTjzQ"
+        "versionLogicalId": "GetTimesLambdaVersionowNApSr6dykWXbWzp57UTT7LQrtkYJQCAATXPdZnP8"
       },
       "getEvents": {
         "handler": "functions/app.getEvents",
@@ -1845,26 +1995,13 @@
             "resolvedPath": "/getEvents"
           }
         ],
-        "environment": {
-          "TableName": {
-            "$ref": "$[\"service\"][\"provider\"][\"compiledCloudFormationTemplate\"][\"Resources\"][\"GetEventsLambdaFunction\"][\"Properties\"][\"Environment\"][\"Variables\"][\"TableName\"]"
-          },
-          "AWS_NODEJS_CONNECTION_REUSE_ENABLED": "1"
-        },
-        "iamRoleStatements": [
-          {
-            "$ref": "$[\"service\"][\"provider\"][\"compiledCloudFormationTemplate\"][\"Resources\"][\"GetEventsIamRoleLambdaExecution\"][\"Properties\"][\"Policies\"][0][\"PolicyDocument\"][\"Statement\"][1]"
-          }
-        ],
         "name": "timer-dev-getEvents",
-        "package": {
-          "artifact": "/Users/ahmad/src/github.com/abualsamid/timer/backend/.serverless/getEvents.zip"
-        },
+        "package": {},
         "memory": 512,
         "timeout": 6,
         "runtime": "nodejs12.x",
         "vpc": {},
-        "versionLogicalId": "GetEventsLambdaVersion97P9htlET8FuCWqm9X2KArfDiiGxBiWDMde8mkmACc"
+        "versionLogicalId": "GetEventsLambdaVersionQ4A7gndjGvz7WJQSkXOmKBDJFaGo04SD2h47WZEeDY"
       },
       "createEvent": {
         "memorySize": 512,
@@ -1880,26 +2017,34 @@
             "resolvedPath": "/createEvent"
           }
         ],
-        "environment": {
-          "TableName": {
-            "$ref": "$[\"service\"][\"provider\"][\"compiledCloudFormationTemplate\"][\"Resources\"][\"CreateEventLambdaFunction\"][\"Properties\"][\"Environment\"][\"Variables\"][\"TableName\"]"
-          },
-          "AWS_NODEJS_CONNECTION_REUSE_ENABLED": "1"
-        },
-        "iamRoleStatements": [
-          {
-            "$ref": "$[\"service\"][\"provider\"][\"compiledCloudFormationTemplate\"][\"Resources\"][\"CreateEventIamRoleLambdaExecution\"][\"Properties\"][\"Policies\"][0][\"PolicyDocument\"][\"Statement\"][1]"
-          }
-        ],
         "name": "timer-dev-createEvent",
-        "package": {
-          "artifact": "/Users/ahmad/src/github.com/abualsamid/timer/backend/.serverless/createEvent.zip"
-        },
+        "package": {},
         "memory": 512,
         "timeout": 6,
         "runtime": "nodejs12.x",
         "vpc": {},
-        "versionLogicalId": "CreateEventLambdaVersion2ozcUxdH61OMTXebvVsTyKgwsKvUamAD1p8NTkAH9w"
+        "versionLogicalId": "CreateEventLambdaVersionpVEcY1bVxR1rEjh59cPh8LnbdNkJGdmg2tYiX9u08"
+      },
+      "addAthlete": {
+        "handler": "functions/app.addAthlete",
+        "events": [
+          {
+            "httpApi": {
+              "method": "POST",
+              "path": "/athlete",
+              "authorizer": "serviceAuthorizer"
+            },
+            "resolvedMethod": "POST",
+            "resolvedPath": "/athlete"
+          }
+        ],
+        "name": "timer-dev-addAthlete",
+        "package": {},
+        "memory": 512,
+        "timeout": 6,
+        "runtime": "nodejs12.x",
+        "vpc": {},
+        "versionLogicalId": "AddAthleteLambdaVersionwsbFuLdhhuwMJd3rnVWlo2jFHIReJO5qPziqEg2M"
       },
       "createTimer": {
         "handler": "functions/app.createTimer",
@@ -1926,14 +2071,12 @@
           }
         ],
         "name": "timer-dev-createTimer",
-        "package": {
-          "artifact": "/Users/ahmad/src/github.com/abualsamid/timer/backend/.serverless/createTimer.zip"
-        },
+        "package": {},
         "memory": 512,
         "timeout": 6,
         "runtime": "nodejs12.x",
         "vpc": {},
-        "versionLogicalId": "CreateTimerLambdaVersionK3x1gfUOXbOKAIsNyPcuDSpDDDL0ZuWjUtQXyhTCJg"
+        "versionLogicalId": "CreateTimerLambdaVersionPQ0COiAWt0R7a8sCwgTi2Xz0XF1DvSTcpWw09zDhCzo"
       },
       "myProfile": {
         "handler": "functions/app.myProfile",
@@ -1960,14 +2103,12 @@
           }
         ],
         "name": "timer-dev-myProfile",
-        "package": {
-          "artifact": "/Users/ahmad/src/github.com/abualsamid/timer/backend/.serverless/myProfile.zip"
-        },
+        "package": {},
         "memory": 512,
         "timeout": 6,
         "runtime": "nodejs12.x",
         "vpc": {},
-        "versionLogicalId": "MyProfileLambdaVersionFBizDqacC7RlqrCyXyNp1EXrKr0PQsT8uS2uQTlRolM"
+        "versionLogicalId": "MyProfileLambdaVersionRvCBISZ9F0DFxqHouT8mMR4yj3CN87289UyJg0RoDc"
       },
       "ConfirmUserSignUp": {
         "handler": "functions/confirm-user-signup.handler",
@@ -1984,14 +2125,12 @@
         ],
         "events": [],
         "name": "timer-dev-ConfirmUserSignUp",
-        "package": {
-          "artifact": "/Users/ahmad/src/github.com/abualsamid/timer/backend/.serverless/ConfirmUserSignUp.zip"
-        },
+        "package": {},
         "memory": 512,
         "timeout": 6,
         "runtime": "nodejs12.x",
         "vpc": {},
-        "versionLogicalId": "ConfirmUserSignUpLambdaVersionSM2U32Zc6NZNbZbQVhGAYVdghGOsSz7ypXJOc6SxVN4"
+        "versionLogicalId": "ConfirmUserSignUpLambdaVersiongCWlIeXRyFECYb1NkKHS6pzwKdPZ2LhdkBYkrKlhm9c"
       }
     },
     "resources": {
@@ -2174,14 +2313,14 @@
         "$ref": "$[\"service\"][\"provider\"]"
       },
       "package": {
-        "individually": true,
         "exclude": [
           "package-lock.json",
           "package.json",
           "yarn.lock",
           "__tests__"
         ],
-        "artifactDirectoryName": "serverless/timer/dev/1614391519434-2021-02-27T02:05:19.434Z"
+        "artifact": "/Users/ahmad/src/github.com/abualsamid/timer/backend/.serverless/timer.zip",
+        "artifactDirectoryName": "serverless/timer/dev/1614483229568-2021-02-28T03:33:49.568Z"
       },
       "custom": {
         "$ref": "$[\"service\"][\"custom\"]"
@@ -2193,11 +2332,11 @@
         "$ref": "$[\"service\"][\"resources\"]"
       }
     },
-    "isDashboardMonitoringPreconfigured": false
+    "isDashboardMonitoringPreconfigured": false,
+    "artifact": "/Users/ahmad/src/github.com/abualsamid/timer/backend/.serverless/timer.zip"
   },
   "package": {
-    "individually": true,
-    "artifactDirectoryName": "serverless/timer/dev/1614391519434-2021-02-27T02:05:19.434Z",
-    "artifact": ""
+    "artifactDirectoryName": "serverless/timer/dev/1614483229568-2021-02-28T03:33:49.568Z",
+    "artifact": "timer.zip"
   }
 }

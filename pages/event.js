@@ -1,5 +1,4 @@
 import { withAuthenticator } from '@aws-amplify/ui-react'
-import { unmarshall } from '@aws-sdk/util-dynamodb'
 import { formatDuration, intervalToDuration } from 'date-fns'
 import Head from 'next/head'
 import { useEffect, useState } from 'react'
@@ -253,8 +252,7 @@ const HistoricalData = () => {
         {data &&
           data.Items &&
           data.Items.length > 0 &&
-          data.Items.map((item) => {
-            const timer = unmarshall(item)
+          data.Items.map((timer) => {
             return (
               <>
                 <TimerLables timer={timer} />

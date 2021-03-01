@@ -4,7 +4,6 @@ import { formatDuration, intervalToDuration } from 'date-fns'
 import { useGet } from 'lib/fetch'
 import { useState } from 'react'
 
-
 const TimerLables = ({ timer }) => {
   return (
     <div className="row m-3">
@@ -53,10 +52,10 @@ const TimerLables = ({ timer }) => {
   )
 }
 
-const HistoricalData = ({eventId}) => {
+const HistoricalData = ({ eventId }) => {
   console.log('HistoricalData ', Date.now())
-  
-  const historicalData = useGet(`/getTimes/${eventId}`)
+
+  const historicalData = useGet(`/getTimesForAthlete/${eventId}`)
   const { data } = historicalData
   console.log(historicalData.data)
   return (
@@ -79,14 +78,14 @@ const HistoricalData = ({eventId}) => {
 }
 
 const Home = () => {
-  const [eventId, setEventId] = useState("")
+  const [eventId, setEventId] = useState('')
   const events = useGet('/getEvents')
   console.log(events)
-  const { data = { Items: [] } } = events
-  const { Items: items = [] } = data 
+  const { data = {} } = events
+  const { items: Items = [] } = data
   console.log('Home ', Date.now())
-  
-  const selectEvent = e => setEventId(e.currentTarget.value)
+
+  const selectEvent = (e) => setEventId(e.currentTarget.value)
   return (
     <Layout>
       <div className="container">
@@ -96,9 +95,9 @@ const Home = () => {
           name="eventId"
           onChange={selectEvent}
         >
-          <option value="" key='0'>(Select Event)</option>
-          {data && items.map((item) => (
-            <option value={item.key} key={item.key}>
+          <option value="">(Select Event)</option>
+          {items.map((item) => (
+            <option value={item.key}>
               {item.name} - {item.track} - {item.date}
             </option>
           ))}

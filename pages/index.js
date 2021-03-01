@@ -7,6 +7,12 @@ const Home = () => {
   return (
     <div className="container my-3">
       <div className="container">
+        <h3>Setup Athletes</h3>
+        <div className="d-grid gap-4">
+          <Link href="/athletes">
+            <a href="" className="btn btn-block btn-outline-primary">Setup Athletes</a>
+          </Link>
+        </div>
         <h3>Time</h3>
         <div className="d-grid gap-4">
           <Link href="/events/express">
@@ -28,7 +34,7 @@ const Home = () => {
             </Link>
           </button>
           <button className="btn btn-block btn-outline-secondary">
-            <Link href="/results">
+            <Link href="/results/athlete">
               <a>Historical Results By Athlete</a>
             </Link>
           </button>

@@ -4,7 +4,8 @@ const db = new DynamoDB()
 const  ulid =require('ulid') 
 const { TableName } = process.env
 const nodeCache = require('node-cache')
-const cache = new nodeCache({stdTTL: 60})
+const { unmarshall } = require('@aws-sdk/util-dynamodb')
+const cache = new nodeCache({stdTTL: 600})
 
 function slugify(str) {
   str = str.replace(/^\s+|\s+$/g, '')
@@ -39,11 +40,87 @@ const extractUser = (event) => {
   return [claims.sub, claims.email]
 }
 
-const Insert = async Item => {
+const Insert = async (Item,userId) => {
+  const _now = Date.now() 
+
+  Item.createdAt = Item.createdAt || _now 
+  Item.updatedAt = Item.updatedAt || _now 
+    
   const item = JSON.stringify(Item).replace(/"/g,"'")
   const Statement = `insert into "${TableName}" value ${item}`
-  return await db.executeStatement({Statement}).promise()
+  const cacheItem = JSON.stringify({
+    id: `${userId}-cache`,
+    key: 'cache',
+    now: _now 
+  }).replace(/"/g,"'")
+
+  const updateCache = `insert into "${TableName}" value ${cacheItem} `
+  // console.log(Statement)
+  try {
+    await db
+      .executeStatement({ Statement })
+      .promise()
+    return Item 
+  } catch (error) {
+    console.error('Insert error ', Statement, error )
+  }
 }
+const updateCacheMarker = async userId => {
+  const _now = Date.now()
+  const Statement = `update "${TableName}" set "now"='${_now}' where "id"='${userId}-cache' and "key"='cache'`
+
+  try {
+    await db.executeStatement({Statement}).promise()
+  } catch (error) {
+    // ConditionalCheckFailedException : item does not already exist 
+    console.log(Statement, error)
+    try {
+      const cacheItem = JSON.stringify({
+        id: `${userId}-cache`,
+        key: 'cache',
+        now: _now,
+      }).replace(/"/g, "'")
+      const Statement = `insert into "${TableName}" value ${cacheItem} `
+      await db.executeStatement({Statement}).promise()
+    } catch (error) {
+      console.log(Statement, error)
+    }
+  }
+}
+const canUseCache = async userId => {
+  try {
+    const Statement = `select * from "${TableName}" where "id"='${userId}-cache' and 'key'='cache'`
+    const res = await db.executeStatement({Statement}).promise()
+    res.Items = res.Items.map((item) => unmarshall(item))
+    const item = res.Items[0]
+    const _now = item.now 
+    if (_now < Date.now() - 600*1000) {
+      return true 
+    }
+  } catch (error) {
+    return false 
+  }
+  return false 
+}
+const get = async ({id, key, userId}) => {
+  const cacheKey = key ? `${id}-${key}` : id
+
+  const _canUseCache = await canUseCache(userId)
+  let res = cache.get(cacheKey)
+  if (res == undefined || _canUseCache==false ) {
+    const Statement = key
+      ? `select * from "${TableName}" where "id"='${id}' and begins_with("key",'${key}') order by "key" desc`
+      : `select * from "${TableName}" where "id"='${id}' order by "key" desc`
+    res = await db.executeStatement({ Statement }).promise()
+    res.Items = res.Items.map((item) => unmarshall(item))
+    cache.set(cacheKey, res)
+    return res
+  } else {
+    console.log('returning items for ', id, key, ' from cache: ', res)
+    return res
+  }
+} 
+
 exports.createEvent = async event => {
   try {
     const data = JSON.parse(event.body)
@@ -58,7 +135,7 @@ exports.createEvent = async event => {
       id: `${id}-event`,
       key,
     }
-    await Insert(Item)
+    await Insert(Item, id)
     return {
       Item,
       message: 'created event'
@@ -71,7 +148,7 @@ exports.createTimer = async (event, context) => {
   try {
     const data = JSON.parse(event.body)
     
-    const [sub, email] = extractUser(event)
+    const [id, email] = extractUser(event)
     const _now = Date.now()
     const key = ulid.ulid()
 
@@ -79,13 +156,13 @@ exports.createTimer = async (event, context) => {
       ...data, 
       createdAt: _now,
       updatedAt: _now,
-      id: `${sub}-time`, 
+      id: `${id}-time`, 
       key: `${data.eventId}-${key}`
     }
     await Insert(Item)
     // if (data.track) {
     //   try {
-    //     await Insert({id: `${sub}-track`, key: `${data.track}`})
+    //     await Insert({id: `${id}-track`, key: `${data.track}`})
         
     //   } catch (error) {
     //     if (error.code !== 'DuplicateItemException') console.log(error)
@@ -93,7 +170,7 @@ exports.createTimer = async (event, context) => {
     // }
     if (data.athlete) {
       try {
-        await Insert({id: `${sub}-athlete`, key: `${data.athlete}`})
+        await Insert({id: `${id}-athlete`, key: `${data.athlete}`},id)
        
       } catch (error) {
         if (error.code !== 'DuplicateItemException') console.log(error)
@@ -113,34 +190,48 @@ exports.createTimer = async (event, context) => {
   }
 }
 
-const get = async (id, key) => {
-  const cacheKey = key ? `${id}-${key}`: id 
-  let res = cache.get(cacheKey) 
-  if (res == undefined) {
-    const Statement = key
-          ? `select * from "${TableName}" where "id"='${id}' and begins_with("key",'${key}') order by "key" desc`
-          : `select * from "${TableName}" where "id"='${id}' order by "key" desc`
-    console.log(Statement)
-    res = await db
-      .executeStatement({Statement})
-      .promise()
-    cache.set(cacheKey, res) 
-    return res 
-  } else {
-    return res 
-  }
-} 
 exports.getEvents = async event => {
-  const [id, email] = extractUser(event) 
+  const [userId, email] = extractUser(event) 
   const cacheKey = `${id}-event`
-  return await get(cacheKey)
+  return await get({id: cacheKey, userId})
   
 }
 
+exports.getAthletes = async event => {
+  const [userId, email] = extractUser(event)
+  const cacheKey = `${userId}-athlete`
+  return await get({id: cacheKey, userId})
+}
+exports.addAthlete = async event => {
+  const [userId, email] = extractUser(event)
+  const cacheKey = `${userId}-athlete`
+  const data = JSON.parse(event.body)
+
+  const item = {
+    id: cacheKey,
+    key: data.id || ulid.ulid(),
+    ...data
+  }
+
+  const Item = await Insert(item, userId )
+  await updateCacheMarker(userId)
+  try {
+    const cached = cache.get(cacheKey)
+    if (cached) {
+      cached.Items = [...cached.Items, Item]
+      cache.set(cacheKey, cached)
+      console.log('set new item in cache, ', cacheKey, cached)
+    }
+  } catch (error) {
+    console.log(error)
+  }
+  
+  return Item
+}
 exports.getTimes = async (event, context) => {
-  const [id, email] = extractUser(event)
+  const [userId, email] = extractUser(event)
   const { eventId } = event.pathParameters
-  return await get(`${id}-time`, eventId)
+  return await get({id: `${userId}-time`, key: eventId, userId})
 }
 
 exports.myProfile = async (event, context) => {
@@ -160,4 +251,9 @@ exports.myProfile = async (event, context) => {
     console.log('Doh ', error)
     return null
   }
+}
+
+
+exports.handler = event => {
+  console.log(event)
 }

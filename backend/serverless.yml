@@ -27,6 +27,13 @@ provider:
   tags:
     service: timer 
   memorySize: 512
+  iamRoleStatements:
+    - Effect: Allow
+      Resource: !GetAtt DynamoTable.Arn
+      Action: 
+        - dynamodb:PartiQLSelect
+        - dynamodb:PartiQLInsert
+        - dynamodb:PartiQLUpdate
   httpApi:
     payload: '2.0'
     cors: true 
@@ -43,7 +50,7 @@ provider:
         audience:
           - Ref: WebUserPoolClient
 package:
-  individually: true
+  # individually: true
   exclude:
     - package-lock.json
     - package.json
@@ -58,6 +65,13 @@ custom:
     ignoreJWTSignature: true
   
 functions:
+  getAthletes:
+    handler: functions/app.getAthletes
+    events:
+      - httpApi:
+          method: GET 
+          path: /getAthletes
+          authorizer: serviceAuthorizer
   getTimes:
     handler: functions/app.getTimes
     events:
@@ -80,14 +94,6 @@ functions:
           method: GET 
           path: /getEvents
           authorizer: serviceAuthorizer
-    environment:
-      TableName: !Ref DynamoTable
-      AWS_NODEJS_CONNECTION_REUSE_ENABLED: "1"
-    iamRoleStatements:
-      - Effect: Allow
-        Resource: !GetAtt DynamoTable.Arn
-        Action: 
-          - dynamodb:PartiQLSelect
   createEvent:
     memorySize: 512
     handler: functions/app.createEvent
@@ -96,14 +102,13 @@ functions:
           method: POST 
           path: /createEvent 
           authorizer: serviceAuthorizer
-    environment:
-      TableName: !Ref DynamoTable
-      AWS_NODEJS_CONNECTION_REUSE_ENABLED:  "1"
-    iamRoleStatements:
-      - Effect: Allow
-        Action: 
-          - dynamodb:PartiQLInsert
-        Resource: !GetAtt DynamoTable.Arn
+  addAthlete:
+    handler:  functions/app.addAthlete
+    events:
+      - httpApi:  
+          method: POST
+          path: /athlete
+          authorizer: serviceAuthorizer
   createTimer:
     handler: functions/app.createTimer
     events:

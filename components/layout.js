@@ -11,7 +11,7 @@ const Layout = ({children}) => {
       <nav className="navbar navbar-light bg-light mb-3">
         <div className="container-fluid">
           <Link href="/">
-            <a class="navbar-brand" href="#">
+            <a className="navbar-brand" href="#">
               Home
             </a>
           </Link>
