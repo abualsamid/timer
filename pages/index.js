@@ -7,13 +7,7 @@ const Home = () => {
   return (
     <div className="container my-3">
       <div className="container">
-        <h3>Setup Athletes</h3>
-        <div className="d-grid gap-4">
-          <Link href="/athletes">
-            <a href="" className="btn btn-block btn-outline-primary">Setup Athletes</a>
-          </Link>
-        </div>
-        <h3>Time</h3>
+        <h3>Timer</h3>
         <div className="d-grid gap-4">
           <Link href="/events/express">
             <a href="" className="btn btn-block btn-outline-danger">
@@ -22,6 +16,14 @@ const Home = () => {
           </Link>
           <Link href="/newEvent">
             <a className="btn btn-block btn-outline-primary">New Event</a>
+          </Link>
+        </div>
+        <h3>Setup Athletes</h3>
+        <div className="d-grid gap-4">
+          <Link href="/athletes">
+            <a href="" className="btn btn-block btn-outline-primary">
+              Setup Athletes
+            </a>
           </Link>
         </div>
       </div>
