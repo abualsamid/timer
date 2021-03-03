@@ -26,7 +26,6 @@ const Home = () => {
     router.push(`/events/${res.Item.key}`)
     return false 
   }
-  console.log(Date.now())
   return (
     <Layout>
       <div className="container">

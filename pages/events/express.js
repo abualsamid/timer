@@ -98,7 +98,6 @@ function TrackTimes({ addCompletedTime }) {
     }
   }
   return (
-    <Layout>
       <div className="container">
         <Form addTimer={addTimer} />
         {timers
@@ -148,7 +147,6 @@ function TrackTimes({ addCompletedTime }) {
           )}
         </div>
       </div>
-    </Layout>
   )
 }
 
@@ -183,12 +181,11 @@ const Form = ({ addTimer }) => {
 const Home = () => {
   const [completedTimes, setCompletedTimes] = useState([])
   const addCompletedTime = (time) => setCompletedTimes((times) => [...times, time])
-
   return (
-    <>
+    <Layout>
       <TrackTimes addCompletedTime={addCompletedTime} />
       <EventTimes times={completedTimes} />
-    </>
+    </Layout>
   )
 }
 

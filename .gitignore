@@ -55,3 +55,14 @@ amplifytools.xcconfig
 .next
 .env.development
 .env.production
+
+.vscode
+aws-exports.js
+.env.production
+.env.development
+yarn.lock
+node_modules
+out
+.next
+
+.serverless
