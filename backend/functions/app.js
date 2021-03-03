@@ -192,7 +192,7 @@ exports.createTimer = async (event, context) => {
 
 exports.getEvents = async event => {
   const [userId, email] = extractUser(event) 
-  const cacheKey = `${id}-event`
+  const cacheKey = `${userId}-event`
   return await get({id: cacheKey, userId})
   
 }

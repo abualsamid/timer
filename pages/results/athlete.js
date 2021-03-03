@@ -1,91 +1,19 @@
 import Layout from '@/components/layout'
 import { withAuthenticator } from '@aws-amplify/ui-react'
-import { formatDuration, intervalToDuration } from 'date-fns'
 import { useGet } from 'lib/fetch'
+import { EventTimes } from 'lib/timer'
 import { useState } from 'react'
 
-const TimerLables = ({ timer }) => {
-  return (
-    <div className="row m-3">
-      <p className="fw-bold">{timer.name}</p>
-      <p>
-        {timer.start && (
-          <span>
-            <strong>Start:</strong> {new Date(timer.start).toString()}
-          </span>
-        )}
-        {timer.end && (
-          <span>
-            {' '}
-            / <strong>End: </strong> {new Date(timer.end).toString()}
-          </span>
-        )}
-      </p>
-      {timer.laps &&
-        timer.laps.map((lap, i) => {
-          return (
-            <div>
-              lap {i + 1}:{' '}
-              {formatDuration(
-                intervalToDuration({
-                  end: lap,
-                  start: i == 0 ? timer.start : timer.laps[i - 1],
-                })
-              )}
-            </div>
-          )
-        })}
-      <p className={timer.finished ? 'fw-bold' : ''}>
-        Total Time:{' '}
-        {timer.started && (
-          <span>
-            {formatDuration(
-              intervalToDuration({
-                start: timer.start,
-                end: timer.end || Date.now(),
-              })
-            )}
-          </span>
-        )}
-      </p>
-    </div>
-  )
-}
 
-const HistoricalData = ({ eventId }) => {
-  console.log('HistoricalData ', Date.now())
-
-  const historicalData = useGet(`/getTimesForAthlete/${eventId}`)
-  const { data } = historicalData
-  console.log(historicalData.data)
-  return (
-    <div className="container">
-      <div className="row m-3">
-        {data &&
-          data.Items &&
-          data.Items.length > 0 &&
-          data.Items.map((timer) => {
-            return (
-              <>
-                <TimerLables timer={timer} />
-                <hr />
-              </>
-            )
-          })}
-      </div>
-    </div>
-  )
-}
 
 const Home = () => {
-  const [eventId, setEventId] = useState('')
-  const events = useGet('/getEvents')
-  console.log(events)
-  const { data = {} } = events
-  const { items: Items = [] } = data
-  console.log('Home ', Date.now())
+  const [athleteId, setAthleteId] = useState('')
+  const { data: athletes = { Items: [] } } = useGet('/getAthletes')
 
-  const selectEvent = (e) => setEventId(e.currentTarget.value)
+  console.log(athletes)
+  console.log('Res by Athlete ', Date.now())
+
+  const selectEvent = (e) => setAthleteId(e.currentTarget.value)
   return (
     <Layout>
       <div className="container">
@@ -95,15 +23,15 @@ const Home = () => {
           name="eventId"
           onChange={selectEvent}
         >
-          <option value="">(Select Event)</option>
-          {items.map((item) => (
-            <option value={item.key}>
-              {item.name} - {item.track} - {item.date}
-            </option>
-          ))}
+          <option value="">(Select Athlete)</option>
+          { athletes.Items.map((item) => (
+              <option value={item.key}>
+                {item.name} - {item.track} - {item.date}
+              </option>
+            ))}
         </select>
         <div className="container">
-          {eventId && <HistoricalData eventId={eventId} />}
+          {athleteId && <EventTimes athleteId={athleteId} />}
         </div>
       </div>
     </Layout>
