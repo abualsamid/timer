@@ -170,7 +170,7 @@ exports.createTimer = async (event, context) => {
     // }
     if (data.athlete) {
       try {
-        await Insert({id: `${id}-athlete`, key: `${data.athlete}`},id)
+        await Insert({...Item, id: `${id}-time-${data.athlete.key}`, key: ulid.ulid()})
        
       } catch (error) {
         if (error.code !== 'DuplicateItemException') console.log(error)
