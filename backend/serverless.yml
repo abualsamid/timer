@@ -115,6 +115,13 @@ functions:
           method: GET 
           path: /getEvents
           authorizer: serviceAuthorizer
+  getEvent:
+    handler: functions/app.getEvent
+    events:
+      - httpApi:
+          method: GET 
+          path: /event/{eventId}
+          authorizer: serviceAuthorizer
   createEvent:
     memorySize: 512
     handler: functions/app.createEvent

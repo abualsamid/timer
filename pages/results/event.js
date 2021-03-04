@@ -56,17 +56,18 @@ const TimerLables = ({ timer }) => {
 const HistoricalData = ({eventId}) => {
   
   const {data} = useGet(`/getTimes/${eventId}`)
-  console.log('HistoricalData ', eventId, data)
   return (
     <div className="container">
+      <h2>Historical results by event</h2>
+
       <div className="row m-3">
         {data &&
           data.Items &&
           data.Items.length > 0 &&
-          data.Items.map((timer) => {
+          data.Items.map((timer, i) => {
             return (
               <>
-                <TimerLables timer={timer} />
+                <TimerLables timer={timer} key={i} />
                 <hr />
               </>
             )

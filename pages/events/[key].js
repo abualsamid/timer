@@ -117,7 +117,7 @@ function TrackTimes({ addCompletedTime, athletes, eventId }) {
     )
     try {
         usePost('createTimer', timer).then((res) =>
-          console.log('created timer on server ', res))
+          console.log('saved'))
         addCompletedTime(timer)
 
     } catch (error) {
@@ -217,7 +217,7 @@ const Form = ({addTimer, athletes}) => {
       </div>
       <div className="d-grid gap-2">
         <button type="submit" className="btn btn-primary btn-lg">
-          Add Athlete
+          Add Race
         </button>
       </div>
     </form>
@@ -232,15 +232,27 @@ const Home = () => {
   const { key: eventId } = router.query
 
   const { data: completedTimes, mutate } = useGet(`/getTimes/${eventId}`)
+  const { data: event } = useGet(`/event/${eventId}`)
   const addCompletedTime = (time) => {
     mutate()
     // do something clever with mutate here 
     //  setCompletedTimes((times) => [...times, time])
   }
-  console.log('eventId ', eventId, 'completedTimes ', completedTimes)
+  console.log('eventId ', eventId, 'completedTimes ', completedTimes, event )
   const { data: athletes = { Items: [] } } = useGet('/getAthletes')
   return (
     <Layout>
+      <h4 className='text-center'>
+        Event: {' '} 
+        {
+          event.name || event.eventName  
+        } - 
+        {
+          new Date(event.date).toLocaleString()
+        }
+      </h4>
+      <br/>
+      
       <TrackTimes
         addCompletedTime={addCompletedTime}
         athletes={athletes}

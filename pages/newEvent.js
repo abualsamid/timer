@@ -14,11 +14,11 @@ const Home = () => {
     const elems = e.currentTarget.elements 
     const track = elems.trackId.value || elems.trackName.value.trim()
     const notes = elems.notes.value.trim()
-    const eventName = elems.eventName.value.trim()
+    const name = elems.eventName.value.trim()
     const data = {
       track,
       notes ,
-      eventName,
+      name,
       date: new Date()
     }
     const res = await usePost('createEvent', data)

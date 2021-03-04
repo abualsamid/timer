@@ -12,19 +12,24 @@ const Home = () => {
   return (
     <Layout>
       <div className="container">
-        {events &&
-          !error &&
-          !loading &&
-          events.Items.sort(Collator.compare).map((a) => (
-            <div key={a.key}>
-              <Link href={`/events/${a.key}`}>
-                <a>
-                  {a.name || a.eventName} : 
-                  {new Date(a.date).toLocaleString()} - {a.notes}
-                </a>
-              </Link>
-            </div>
-          ))}
+        <h3 className="text-center">Events</h3>
+        <p>
+          Select an event to view completed times or to time new races.
+        </p>
+        {events && !error && !loading && (
+          <ul>
+            {events.Items.sort(Collator.compare).map((a) => (
+              <li key={a.key}>
+                <Link href={`/events/${a.key}`}>
+                  <a>
+                    {a.name || a.eventName} :{new Date(a.date).toLocaleString()}{' '}
+                    - {a.notes}
+                  </a>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
     </Layout>
   )

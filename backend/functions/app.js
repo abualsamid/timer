@@ -207,6 +207,18 @@ exports.getEvents = async event => {
   return await get({id: cacheKey, userId})
   
 }
+exports.getEvent = async event => {
+  const [userId, email] = extractUser(event) 
+  const { eventId } = event.pathParameters
+
+  const cacheKey = `${userId}-event`
+  const events = await get({ id: cacheKey, key: eventId,  userId })
+  if (events && events.Items && events.Items.length > 0) {
+    return events.Items[0]
+  } 
+  return null 
+
+}
 
 exports.getAthletes = async event => {
   const [userId, email] = extractUser(event)
