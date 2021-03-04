@@ -1,4 +1,3 @@
-import { withAuthenticator } from '@aws-amplify/ui-react'
 import Layout from 'components/layout'
 import { EventTimes, TimerLabels } from 'lib/timer'
 import { useEffect, useState } from 'react'
@@ -189,4 +188,4 @@ const Home = () => {
   )
 }
 
-export default withAuthenticator(Home, { usernameAlias: 'email' })
+export default Home

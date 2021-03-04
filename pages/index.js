@@ -1,4 +1,3 @@
-import { withAuthenticator } from '@aws-amplify/ui-react'
 import Link from 'next/link'
 
 
@@ -70,4 +69,4 @@ const Home = () => {
     </div>
   )
 }
-export default withAuthenticator(Home, {usernameAlias: 'email'})
+export default Home

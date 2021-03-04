@@ -5,7 +5,8 @@
   "license": "MIT",
   "scripts": {
     "sls": "sls",
-    "deploy": "sls deploy --verbose --debug"
+    "deploy": "sls deploy --verbose --debug",
+    "deploy:production": "sls deploy --stage production --verbose"
   },
   "devDependencies": {
     "serverless": "2.27.0",

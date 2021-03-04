@@ -209,6 +209,7 @@ resources:
                 - '*'
     DynamoTable:
       Type: AWS::DynamoDB::Table
+      DeletionPolicy: Retain
       Properties:
         TableName: ${self:custom.tableName}
         BillingMode: PAY_PER_REQUEST
@@ -229,6 +230,7 @@ resources:
             Value: ${self:custom.tableName}
     CognitoUserPool:
       Type: AWS::Cognito::UserPool
+      DeletionPolicy: Retain
       Properties:
         UserPoolName: ${self:custom.userPoolName}
         AutoVerifiedAttributes:

@@ -22,7 +22,7 @@ const Home = () => {
   return (
     <Layout>
       <div className="container">
-        <h2>Historical results</h2>
+        <h2>Historical results by athlete</h2>
         <select
           className="form-select select"
           name="eventId"
