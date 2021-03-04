@@ -63,6 +63,7 @@ aws-exports.js
 yarn.lock
 node_modules
 out
+prod
 .next
 
 .serverless
