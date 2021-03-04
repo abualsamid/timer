@@ -7,11 +7,10 @@ import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
 import { ulid } from 'ulid'
 
-function TrackTimes({ addCompletedTime, athletes }) {
+function TrackTimes({ addCompletedTime, athletes, eventId }) {
   const [timers, setTimers] = useState([])
   const [intervalId, setIntervalId] = useState(null)
   const router = useRouter()
-  const { key } = router.query
 
   useEffect(() => {
     return () => clearInterval(intervalId)
@@ -111,7 +110,7 @@ function TrackTimes({ addCompletedTime, athletes }) {
     timer.end = d
     timer.total = d - timer.start
     timer.finished = true
-    timer.eventId = key
+    timer.eventId = eventId
 
     setTimers((timers) =>
       timers.map((_timer) => (_timer.uid === uid ? timer : _timer))
@@ -229,18 +228,25 @@ const Form = ({addTimer, athletes}) => {
 
 
 const Home = () => {
-  const [completedTimes, setCompletedTimes] = useState([])
-  const addCompletedTime = (time) =>
-    setCompletedTimes((times) => [...times, time])
+  const router = useRouter()
+  const { key: eventId } = router.query
 
+  const { data: completedTimes, mutate } = useGet(`/getTimes/${eventId}`)
+  const addCompletedTime = (time) => {
+    mutate()
+    // do something clever with mutate here 
+    //  setCompletedTimes((times) => [...times, time])
+  }
+  console.log('eventId ', eventId, 'completedTimes ', completedTimes)
   const { data: athletes = { Items: [] } } = useGet('/getAthletes')
   return (
     <Layout>
       <TrackTimes
         addCompletedTime={addCompletedTime}
         athletes={athletes}
+        eventId={eventId}
       />
-      <EventTimes times={completedTimes} />
+      {completedTimes && <EventTimes times={completedTimes.Items} />}
     </Layout>
   )
 }

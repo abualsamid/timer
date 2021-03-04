@@ -25,7 +25,7 @@ const TimerLables = ({ timer }) => {
       {timer.laps &&
         timer.laps.map((lap, i) => {
           return (
-            <div>
+            <div key={i}>
               lap {i + 1}:{' '}
               {formatDuration(
                 intervalToDuration({
@@ -54,11 +54,9 @@ const TimerLables = ({ timer }) => {
 }
 
 const HistoricalData = ({eventId}) => {
-  console.log('HistoricalData ', Date.now())
   
-  const historicalData = useGet(`/getTimes/${eventId}`)
-  const { data } = historicalData
-  console.log(historicalData.data)
+  const {data} = useGet(`/getTimes/${eventId}`)
+  console.log('HistoricalData ', eventId, data)
   return (
     <div className="container">
       <div className="row m-3">
@@ -80,10 +78,9 @@ const HistoricalData = ({eventId}) => {
 
 const Home = () => {
   const [eventId, setEventId] = useState("")
-  const events = useGet('/getEvents')
-  console.log(events)
-  const { data = { Items: [] } } = events
-  const { Items: items = [] } = data 
+  const { data: { Items:items = []} = {Items:[]} } = useGet('/getEvents')
+  // const { data = { Items: [] } } = events
+  // const { Items: items = [] } = data 
   console.log('Home ', Date.now())
   
   const selectEvent = e => setEventId(e.currentTarget.value)
@@ -97,9 +94,9 @@ const Home = () => {
           onChange={selectEvent}
         >
           <option value="" key='0'>(Select Event)</option>
-          {data && items.map((item) => (
+          {items && items.map((item) => (
             <option value={item.key} key={item.key}>
-              {item.name} - {item.track} - {item.date}
+              {item.name || item.eventName } - {item.track} - {item.date}
             </option>
           ))}
         </select>

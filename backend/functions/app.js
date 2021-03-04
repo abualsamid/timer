@@ -5,7 +5,7 @@ const  ulid =require('ulid')
 const { TableName } = process.env
 const nodeCache = require('node-cache')
 const { unmarshall } = require('@aws-sdk/util-dynamodb')
-const cache = new nodeCache({stdTTL: 600})
+const cache = new nodeCache({stdTTL: 1200})
 
 function slugify(str) {
   str = str.replace(/^\s+|\s+$/g, '')
@@ -48,22 +48,18 @@ const Insert = async (Item,userId) => {
     
   const item = JSON.stringify(Item).replace(/"/g,"'")
   const Statement = `insert into "${TableName}" value ${item}`
-  const cacheItem = JSON.stringify({
-    id: `${userId}-cache`,
-    key: 'cache',
-    now: _now 
-  }).replace(/"/g,"'")
 
-  const updateCache = `insert into "${TableName}" value ${cacheItem} `
+  
   // console.log(Statement)
   try {
     await db
       .executeStatement({ Statement })
       .promise()
-    return Item 
   } catch (error) {
     console.error('Insert error ', Statement, error )
   }
+  return Item 
+
 }
 const updateCacheMarker = async userId => {
   const _now = Date.now()
@@ -86,6 +82,7 @@ const updateCacheMarker = async userId => {
       console.log(Statement, error)
     }
   }
+  return 
 }
 const canUseCache = async userId => {
   try {
@@ -159,15 +156,10 @@ exports.createTimer = async (event, context) => {
       id: `${id}-time`, 
       key: `${data.eventId}-${key}`
     }
+    // create the time by event
     await Insert(Item)
-    // if (data.track) {
-    //   try {
-    //     await Insert({id: `${id}-track`, key: `${data.track}`})
-        
-    //   } catch (error) {
-    //     if (error.code !== 'DuplicateItemException') console.log(error)
-    //   }
-    // }
+    
+    // ditto by athlete
     if (data.athlete) {
       try {
         await Insert({...Item, id: `${id}-time-${data.athlete.key}`, key: ulid.ulid()})
@@ -176,6 +168,25 @@ exports.createTimer = async (event, context) => {
         if (error.code !== 'DuplicateItemException') console.log(error)
         
       }
+    }
+    // and by distance 
+    // txd: time by distance
+    await Insert({
+      ...Item,
+      id: `${id}-txd-${data.distance}`,
+      key: ulid.ulid(),
+    })
+
+    // create unique list of distances
+    try {
+      await Insert({
+        ...Item, 
+        id: `${id}-distance`,
+        key: data.distance,
+        name: data.distance 
+      })
+    } catch (error) {
+      
     }
     const response = {
       Item, 
@@ -202,6 +213,38 @@ exports.getAthletes = async event => {
   const cacheKey = `${userId}-athlete`
   return await get({id: cacheKey, userId})
 }
+
+exports.getDistances = async event => {
+  const [userId, email] = extractUser(event)
+  const cacheKey = `${userId}-distance`
+  return await get({ id: cacheKey, userId })
+
+}
+exports.addDistance  = async event => {
+  const [userId, email] = extractUser(event)
+  const cacheKey = `${userId}-distance`
+  const data = JSON.parse(event.body)
+
+  const item = {
+    id: cacheKey,
+    key: data.distance || ulid.ulid(),
+    ...data,
+  }
+
+  const Item = await Insert(item, userId)
+  try {
+    const cached = cache.get(cacheKey)
+    if (cached) {
+      cached.Items = [...cached.Items, Item]
+      cache.set(cacheKey, cached)
+      console.log('set new item in cache, ', cacheKey, cached)
+    }
+  } catch (error) {
+    console.log(error)
+  }
+
+  return Item
+}
 exports.addAthlete = async event => {
   const [userId, email] = extractUser(event)
   const cacheKey = `${userId}-athlete`
@@ -214,7 +257,6 @@ exports.addAthlete = async event => {
   }
 
   const Item = await Insert(item, userId )
-  await updateCacheMarker(userId)
   try {
     const cached = cache.get(cacheKey)
     if (cached) {
@@ -232,6 +274,18 @@ exports.getTimes = async (event, context) => {
   const [userId, email] = extractUser(event)
   const { eventId } = event.pathParameters
   return await get({id: `${userId}-time`, key: eventId, userId})
+}
+
+exports.getTimeByAthlete = async (event, context) => {
+  const [userId, email] = extractUser(event)
+  const {athleteId} = event.pathParameters
+  return await get({id: `${userId}-time-${athleteId}`})
+}
+
+exports.getTimeByDistance = async (event, context) => {
+  const [userId, email] = extractUser(event)
+  const { distance } = event.pathParameters
+  return await get({ id: `${userId}-txd-${distance}` })
 }
 
 exports.myProfile = async (event, context) => {

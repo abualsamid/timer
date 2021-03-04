@@ -7,13 +7,18 @@ import { useState } from 'react'
 
 
 const Home = () => {
-  const [athleteId, setAthleteId] = useState('')
+  const [athleteId, setAthleteId] = useState(null)
   const { data: athletes = { Items: [] } } = useGet('/getAthletes')
+  const { data: times } = useGet(() =>
+    athleteId ? `/getTimeByAthlete/${athleteId}` : null
+  )
 
-  console.log(athletes)
+  console.log(athletes, times )
   console.log('Res by Athlete ', Date.now())
 
-  const selectEvent = (e) => setAthleteId(e.currentTarget.value)
+  const selectAthlete = e => {
+    setAthleteId(e.currentTarget.value)
+  }
   return (
     <Layout>
       <div className="container">
@@ -21,17 +26,17 @@ const Home = () => {
         <select
           className="form-select select"
           name="eventId"
-          onChange={selectEvent}
+          onChange={selectAthlete}
         >
           <option value="">(Select Athlete)</option>
           { athletes.Items.map((item) => (
-              <option value={item.key}>
+              <option value={item.key} key={item.key}>
                 {item.name} - {item.track} - {item.date}
               </option>
             ))}
         </select>
         <div className="container">
-          {athleteId && <EventTimes athleteId={athleteId} />}
+          {athleteId && times && times.Items.length>0 && <EventTimes times={times.Items} />}
         </div>
       </div>
     </Layout>

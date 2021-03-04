@@ -7,17 +7,26 @@ const Home = () => {
   return (
     <div className="container my-3">
       <div className="container">
-        <h3>Timer</h3>
-        <div className="d-grid gap-4">
+        <div className="card  p-3">
+          <h3 className="text-center">Timer</h3>
+          <br />
+          <span>Time athletes without any setup</span>
+
           <Link href="/events/express">
-            <a href="" className="btn btn-block btn-outline-danger">
+            <a href="" className="d-block btn btn-block btn-primary p-2 m-2">
               Express Timing
             </a>
           </Link>
+          <br />
+          <span>Create and Manage Events</span>
           <Link href="/newEvent">
-            <a className="btn btn-block btn-outline-primary">New Event</a>
+            <a className="btn btn-block btn-primary m-2 p-2">New Event</a>
+          </Link>
+          <Link href="/events">
+            <a className="btn btn-block btn-primary  m-2 p-2">Access Events</a>
           </Link>
         </div>
+
         <h3>Setup Athletes</h3>
         <div className="d-grid gap-4">
           <Link href="/athletes">
@@ -41,7 +50,7 @@ const Home = () => {
             </Link>
           </button>
           <button className="btn btn-block btn-outline-danger">
-            <Link href="/results">
+            <Link href="/results/distance">
               <a>Historical Results By Distance</a>
             </Link>
           </button>

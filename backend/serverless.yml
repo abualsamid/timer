@@ -65,6 +65,20 @@ custom:
     ignoreJWTSignature: true
   
 functions:
+  getTimeByDistance:
+    handler: functions/app.getTimeByDistance
+    events:
+      - httpApi:
+          method: GET
+          path: /getTimeByDistance/{distance}
+          authorizer: serviceAuthorizer
+  getDistances:
+    handler: functions/app.getDistances
+    events:
+      - httpApi:
+          method: GET 
+          path: /getDistances
+          authorizer: serviceAuthorizer
   getAthletes:
     handler: functions/app.getAthletes
     events:
@@ -87,6 +101,13 @@ functions:
         Resource: !GetAtt DynamoTable.Arn
         Action: 
           - dynamodb:PartiQLSelect
+  getTimeByAthlete:
+    handler: functions/app.getTimeByAthlete
+    events: 
+      - httpApi:
+          method: GET 
+          path: /getTimeByAthlete/{athleteId}
+          authorizer: serviceAuthorizer
   getEvents:
     handler: functions/app.getEvents
     events:
@@ -108,6 +129,13 @@ functions:
       - httpApi:  
           method: POST
           path: /athlete
+          authorizer: serviceAuthorizer
+  addDistance:
+    handler: functions/app.addDistance
+    events:
+      - httpApi:
+          method: POST 
+          path: /distance 
           authorizer: serviceAuthorizer
   createTimer:
     handler: functions/app.createTimer
