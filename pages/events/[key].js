@@ -242,17 +242,15 @@ const Home = () => {
   const { data: athletes = { Items: [] } } = useGet('/getAthletes')
   return (
     <Layout>
-      <h4 className='text-center'>
-        Event: {' '} 
-        {
-          event.name || event.eventName  
-        } - 
-        {
-          new Date(event.date).toLocaleString()
-        }
-      </h4>
-      <br/>
-      
+      {event && (
+        <h4 className="text-center">
+          Event: {event.name || event.eventName} -
+          {new Date(event.date).toLocaleString()}
+        </h4>
+      )}
+
+      <br />
+
       <TrackTimes
         addCompletedTime={addCompletedTime}
         athletes={athletes}
