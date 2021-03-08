@@ -5,10 +5,10 @@
   "scripts": {
     "next": "next",
     "dev": "cp .env.development .env.local && next dev",
-    "build": "git checkout main && cp .env.development .env.local && next build && next export",
-    "deploy": "amplify publish",
-    "production": "git checkout production && cp .env.production .env.local && next build && next export -o prod",
-    "deploy:production": "yarn production && pushd prod && aws --region us-east-1 s3 sync --delete . s3://timer-20210220173156-hostingbucket-production --exclude '*.DS_Store' --cache-control public,max-age=604800 && popd",
+    "build:qa": "git checkout main && cp .env.development .env.local && next build && next export",
+    "deploy:qa": "yarn build:qa && pushd out && aws --region us-east-1 s3 sync --delete . s3://timer-20210220173156-hostingbucket-dev --exclude '*.DS_Store' --cache-control public,max-age=604800 && popd",
+    "build:production": "git checkout production && cp .env.production .env.local && next build && next export -o prod",
+    "deploy:production": "yarn build:production && pushd prod && aws --region us-east-1 s3 sync --delete . s3://timer-20210220173156-hostingbucket-production --exclude '*.DS_Store' --cache-control public,max-age=604800 && popd",
     "start": "next start"
   },
   "dependencies": {
