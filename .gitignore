@@ -68,3 +68,6 @@ prod
 
 .serverless
 prod
+
+**/public/workbox-*.js
+**/public/sw.js

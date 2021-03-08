@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-		"next": "next",
+    "next": "next",
     "dev": "cp .env.development .env.local && next dev",
     "build": "git checkout main && cp .env.development .env.local && next build && next export",
     "deploy": "amplify publish",
@@ -19,10 +19,13 @@
     "bootstrap": "^5.0.0-beta2",
     "date-fns": "^2.17.0",
     "global": "^4.4.0",
-    "next": "10.0.7",
+    "next": "^10.0.8",
     "react": "17.0.1",
     "react-dom": "17.0.1",
     "swr": "^0.4.2",
     "ulid": "^2.3.0"
+  },
+  "devDependencies": {
+    "next-pwa": "^5.0.6"
   }
 }
