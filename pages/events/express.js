@@ -5,13 +5,17 @@ import { useEffect, useState } from 'react'
 import { ulid } from 'ulid'
 
 function TrackTimes({ addCompletedTime }) {
-  const [timers, setTimers] = useState(window?JSON.parse(window.localStorage.getItem('coachTimer.timers') || '[]') :[])
+  const [timers, setTimers] = useState(
+    typeof window !== 'undefined'
+      ? JSON.parse(window.localStorage.getItem('coachTimer.timers') || '[]')
+      : []
+  )
   const [intervalId, setIntervalId] = useState(null)
 
   
   const saveStateToLocalStorage = () => {
     try {
-      if (window) {
+      if (typeof window !== 'undefined') {
         window.localStorage.setItem('coachTimer.timers', JSON.stringify(timers))
       }
     } catch (error) {
@@ -135,8 +139,8 @@ function TrackTimes({ addCompletedTime }) {
       console.log( error)
     }
     try {
-      if (window) {
-        window.localStorage.setItem('coachTimer.timers',JSON.stringify(timers))
+      if (typeof window !== 'undefined') {
+        window.localStorage.setItem('coachTimer.timers', JSON.stringify(timers))
       }
     } catch (error) {
       console.log('error saving local storage.')
@@ -260,7 +264,13 @@ const Form = ({ addTimer }) => {
 
 
 const Home = () => {
-  const [completedTimes, setCompletedTimes] = useState(window?JSON.parse(window.localStorage.getItem('coachTimer.completedTimes')||'[]'):[])
+  const [completedTimes, setCompletedTimes] = useState(
+    typeof window !== 'undefined'
+      ? JSON.parse(
+          window.localStorage.getItem('coachTimer.completedTimes') || '[]'
+        )
+      : []
+  )
   const [user, setUser] = useState(null)
   const [athletes, setAthletes] = useState([])
   useEffect(()=> {
@@ -286,8 +296,11 @@ const Home = () => {
   // }
   const addCompletedTime = (time) => setCompletedTimes((times) => {
     const newTimes = [...times, time]
-    if(window){
-      window.localStorage.setItem('coachTimer.completedTimes', JSON.stringify(newTimes))
+    if (typeof window !== 'undefined') {
+      window.localStorage.setItem(
+        'coachTimer.completedTimes',
+        JSON.stringify(newTimes)
+      )
     }
     return newTimes
   })
