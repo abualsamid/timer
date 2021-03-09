@@ -19,3 +19,9 @@ a {
   font-variant-caps: small-caps;
   font-style:italic;
 }
+
+.auto-complete {
+  padding: 1rem;
+  border: 1px solid black;
+  background-color: lightgray;
+}

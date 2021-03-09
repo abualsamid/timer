@@ -5,37 +5,38 @@ import { useEffect, useState } from 'react'
 import { ulid } from 'ulid'
 
 function TrackTimes({ addCompletedTime }) {
+  
+  const [intervalId, setIntervalId] = useState(null)
+  useEffect(() => {
+    return () => clearInterval(intervalId)
+  }, [])
+  
   const [timers, setTimers] = useState(
     typeof window !== 'undefined'
       ? JSON.parse(window.localStorage.getItem('coachTimer.timers') || '[]')
       : []
   )
-  const [intervalId, setIntervalId] = useState(null)
-
   
-  const saveStateToLocalStorage = () => {
+  const saveStateToLocalStorage = (timers) => {
+    setTimers(_timers => timers )
     try {
       if (typeof window !== 'undefined') {
         window.localStorage.setItem('coachTimer.timers', JSON.stringify(timers))
       }
     } catch (error) {
-      console.log('error saving local storage.')
+      console.log('error saving local storage. ', error)
     }
   }
-  useEffect(() => {
-    return () => clearInterval(intervalId)
-  }, [])
 
+  
   const stopUpdating = () => {
     if (intervalId) {
-      console.log('stopping ticker...')
       clearInterval(intervalId)
       setIntervalId(null)
     }
   }
   const startUpdating = () => {
     if (!intervalId) {
-      console.log('starting ticker...')
       const i = setInterval(updateRunningClock, 1000 * 1)
       setIntervalId((_intervalId) => i)
     }
@@ -50,9 +51,7 @@ function TrackTimes({ addCompletedTime }) {
         })
       return [...timers]
     })
-    if (Date.now() % 10 === 0) {
-      saveStateToLocalStorage()
-    }
+    
   }
   const addTimer = (e) => {
     e.preventDefault()
@@ -71,29 +70,22 @@ function TrackTimes({ addCompletedTime }) {
       finished: false,
       laps: [],
     }
-    setTimers((timers) => [...timers, timer])
+    saveStateToLocalStorage([...timers, timer])
 
     elems.athlete.value = ''
-    console.log('added timer ', timer)
-    saveStateToLocalStorage()
     return false
   }
 
   const startAllTimers = () => {
     const _now = Date.now()
     startUpdating()
-
-    setTimers((timers) =>
-      timers.map((timer) => {
+    saveStateToLocalStorage(timers.map((timer) => {
         if (!timer.finished && !timer.started) {
           timer.start = _now
           timer.started = true
         }
         return timer
-      })
-    )
-    saveStateToLocalStorage()
-
+      }))
   }
 
   const startTimer = (uid) => {
@@ -103,22 +95,16 @@ function TrackTimes({ addCompletedTime }) {
     const timer = timers.find((t) => t.uid === uid)
     timer.start = d
     timer.started = true
-    setTimers((timers) =>
-      timers.map((_timer) => (_timer.uid === uid ? timer : _timer))
-    )
-    saveStateToLocalStorage()
-
+   
+    saveStateToLocalStorage(timers.map((_timer) => (_timer.uid === uid ? timer : _timer)))
   }
+
   const lapTimer = (uid) => {
     const d = Date.now()
     const timer = timers.find((t) => t.uid === uid)
     timer.laps.push(d)
 
-    setTimers((timers) =>
-      timers.map((_timer) => (_timer.uid === uid ? timer : _timer))
-    )
-    saveStateToLocalStorage()
-
+    saveStateToLocalStorage(timers.map((_timer) => (_timer.uid === uid ? timer : _timer)))
   }
 
   const finishTimer = async (uid) => {
@@ -129,9 +115,8 @@ function TrackTimes({ addCompletedTime }) {
     timer.total = d - timer.start
     timer.finished = true
 
-    setTimers((timers) =>
-      timers.map((_timer) => (_timer.uid === uid ? timer : _timer))
-    )
+    saveStateToLocalStorage(timers.map((_timer) => (_timer.uid === uid ? timer : _timer)))
+
 
     try {
       addCompletedTime(timer)
@@ -149,7 +134,6 @@ function TrackTimes({ addCompletedTime }) {
     if (!remaining) {
       stopUpdating()
     }
-    saveStateToLocalStorage()
 
   }
 
@@ -162,9 +146,9 @@ function TrackTimes({ addCompletedTime }) {
         <Form addTimer={addTimer} />
         {timers
           .filter((timer) => !timer.finished)
-          .map((timer) => {
+          .map((timer,i) => {
             return (
-              <div className="row m-3 card">
+              <div className="row m-3 card" key={i}>
                 <TimerLabels timer={timer} />
                 <div>
                   {!timer.started && !timer.finished && (
@@ -222,16 +206,23 @@ const matchName = (name, search) => {
 }
 const SearchPreview = ({name},onClick) => {
   return (
-    <div style={{border: '1px solid black'}} onClick={e => onClick(name)}>
+    <div className='auto-complete' onClick={e => onClick(name)}>
       {name}
     </div>
   )
 }
 const Form = ({ addTimer }) => {
   const [search, setSearch] = useState("")
-  const onClick = name => setSearch(name)
+  const [picked, setPicked] = useState(false) 
+  const onClick = name => { setSearch(name); setPicked(true) }
   return (
-    <form onSubmit={addTimer} autocomplete="off">
+    <form
+      onSubmit={(e) => {
+        addTimer(e)
+        setSearch('')
+      }}
+      autoComplete="off"
+    >
       <div className="mb-3">
         <label htmlFor="athlete">Athlete's name</label>
 
@@ -242,13 +233,17 @@ const Form = ({ addTimer }) => {
           type="text"
           placeholder="Athlete Name"
           value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          autocomplete="off"
+          onChange={(e) => {
+            setPicked(false)
+            setSearch(e.target.value)
+          }}
+          autoComplete="off"
         ></input>
       </div>
-      {athletes
-        .filter((a) => matchName(a.name, search))
-        .map((a) => SearchPreview(a, onClick))}
+      {(search === '' || !picked) &&
+        athletes
+          .filter((a) => matchName(a.name, search))
+          .map((a) => SearchPreview(a, onClick))}
 
       <div className="d-grid gap-2">
         <button type="submit" className="btn btn-primary btn-lg">
@@ -260,7 +255,47 @@ const Form = ({ addTimer }) => {
 }
 
 
+const SaveForm = ({user}) => {
+  const createEvent = async (e) => {
+    e.preventDefault()
 
+    const elems = e.currentTarget.elements
+    const track = elems.trackId.value || elems.trackName.value.trim()
+    const notes = elems.notes.value.trim()
+    const name = elems.eventName.value.trim()
+    const data = {
+      track,
+      notes,
+      name,
+      date: new Date(),
+    }
+    const res = await usePost('createEvent', data)
+    console.log(res)
+    router.push(`/events/${res.Item.key}`)
+    return false
+  }
+  return (
+    <form onSubmit={createEvent}>
+      <div className="mb-3">
+        <label htmlFor="eventName">Event Name</label>
+        <input type="text" className="form-control" name="eventName" />
+      </div>
+      <div className="mb-3">
+        <label htmlFor="trackId">Track</label>
+        <input type="text" name="trackName" className="form-control" />
+      </div>
+      <div className="mb-3">
+        <label htmlFor="notes">Notes</label>
+        <input type="text" className="form-control" name="notes" />
+      </div>
+      <div className="d-grid">
+        <button className="btn btn-primary" type="submit">
+          Save to Database...
+        </button>
+      </div>
+    </form>
+  )
+}
 
 
 const Home = () => {
@@ -276,9 +311,7 @@ const Home = () => {
   useEffect(()=> {
     async function checkUser() {
       const u = await Auth.currentAuthenticatedUser()
-      console.log('current user ', u)
       setUser(u)
-      
     }
     checkUser()
   },[])
@@ -308,6 +341,9 @@ const Home = () => {
     <Layout>
       <TrackTimes addCompletedTime={addCompletedTime} user={user} />
       <EventTimes times={completedTimes} />
+      {
+        user && completedTimes && <SaveForm user={user} />
+      }
     </Layout>
   )
 }

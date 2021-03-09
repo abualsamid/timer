@@ -3,7 +3,7 @@ import Link from 'next/link'
 
 const Layout = ({children}) => {
   return (
-    <div className="container">
+    <div className="container-fluid">
       <Head>
         <title>timers because no good ones exist</title>
         <link rel="icon" href="/favicon.ico" />
@@ -17,15 +17,13 @@ const Layout = ({children}) => {
       <nav className="navbar navbar-light bg-light mb-3">
         <div className="container-fluid">
           <Link href="/">
-            <a className="navbar-brand" href="#">
-              Home
+            <a className="navbar-brand small-caps" href="#">
+              CoachTimer
             </a>
           </Link>
         </div>
       </nav>
-      <div className="container my-3">
-        <h3 className="text-center small-caps">CoachTimer</h3>
-        <br />
+      <div className="my-3">
         {children}
       </div>
     </div>

@@ -7,7 +7,7 @@ const Home = () => {
   
   return (
     <Layout>
-        <div className="m-2 p-2">
+        <div className="m-2 p-2" style={{border: '1px'}}>
           <span>
             Time athletes without any setup - results are not saved in database
           </span>
