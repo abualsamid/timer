@@ -32,7 +32,12 @@ export default class extends Document {
             href="/icons/apple-touch-icon.png"
           />
           <link rel="manifest" href="/manifest.json" />
+          <link rel="icon" href="/icons/logo-512x512.png" />
           <link rel="shortcut icon" href="/icons/favicon.ico" />
+          <link
+            rel="stylesheet"
+            href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap"
+          />
           <style>{`
             html, body, #__next {
               height: 100%;

@@ -13,7 +13,7 @@ const Home = () => {
           </span>
           <Link href="/events/express">
             <a href="" className="d-block btn btn-lg btn-primary p-2 m-2">
-              Express Timing
+              Timer
             </a>
           </Link>
           <br />
