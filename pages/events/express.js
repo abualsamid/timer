@@ -1,6 +1,8 @@
 import { Auth } from 'aws-amplify'
 import Layout from 'components/layout'
+import { usePost } from 'lib/fetch'
 import { EventTimes, TimerLabels } from 'lib/timer'
+import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
 import { ulid } from 'ulid'
 
@@ -194,23 +196,6 @@ function TrackTimes({ addCompletedTime }) {
   )
 }
 
-const athletes = [
-  {name: 'Asia'},
-  {name: 'Bassel'},
-  {name: 'Ahmad'},
-  {name: 'John'},
-  {name: 'Joe'}
-]
-const matchName = (name, search) => {
-  return search.length>0 && name.includes(search)
-}
-const SearchPreview = ({name},onClick) => {
-  return (
-    <div className='auto-complete' onClick={e => onClick(name)}>
-      {name}
-    </div>
-  )
-}
 const Form = ({ addTimer }) => {
   const [search, setSearch] = useState("")
   const [picked, setPicked] = useState(false) 
@@ -240,10 +225,7 @@ const Form = ({ addTimer }) => {
           autoComplete="off"
         ></input>
       </div>
-      {(search === '' || !picked) &&
-        athletes
-          .filter((a) => matchName(a.name, search))
-          .map((a) => SearchPreview(a, onClick))}
+      
 
       <div className="d-grid gap-2">
         <button type="submit" className="btn btn-primary btn-lg">
@@ -255,12 +237,12 @@ const Form = ({ addTimer }) => {
 }
 
 
-const SaveForm = ({user}) => {
-  const createEvent = async (e) => {
+const SaveForm = ({user, createEvent}) => {
+  const onSubmit = async (e) => {
     e.preventDefault()
 
     const elems = e.currentTarget.elements
-    const track = elems.trackId.value || elems.trackName.value.trim()
+    const track = elems.trackName.value.trim()
     const notes = elems.notes.value.trim()
     const name = elems.eventName.value.trim()
     const data = {
@@ -269,13 +251,11 @@ const SaveForm = ({user}) => {
       name,
       date: new Date(),
     }
-    const res = await usePost('createEvent', data)
-    console.log(res)
-    router.push(`/events/${res.Item.key}`)
+    createEvent(data)
     return false
   }
   return (
-    <form onSubmit={createEvent}>
+    <form onSubmit={onSubmit}>
       <div className="mb-3">
         <label htmlFor="eventName">Event Name</label>
         <input type="text" className="form-control" name="eventName" />
@@ -297,8 +277,15 @@ const SaveForm = ({user}) => {
   )
 }
 
-
+const clearLocalStorage = () => {
+  typeof window !== 'undefined' &&
+    window.localStorage.removeItem('coachTimer.completedTimes')
+  typeof window !== 'undefined' &&
+    window.localStorage.removeItem('coachTimer.coachTimer.timers')
+}
 const Home = () => {
+  const router = useRouter()
+  const [event, setEvent] = useState(null)
   const [completedTimes, setCompletedTimes] = useState(
     typeof window !== 'undefined'
       ? JSON.parse(
@@ -307,7 +294,6 @@ const Home = () => {
       : []
   )
   const [user, setUser] = useState(null)
-  const [athletes, setAthletes] = useState([])
   useEffect(()=> {
     async function checkUser() {
       const u = await Auth.currentAuthenticatedUser()
@@ -315,18 +301,7 @@ const Home = () => {
     }
     checkUser()
   },[])
-  // if(user) {
-  //     const { data } =  useGet('/getAthletes')
-  //     if (data) {
-  //       console.log('got athlete list from server ', data)
-  //       setAthletes([...data])
-  //     }
-  // } else {
-  //   const a = window ? window.localStorage.getItem('athletes'): []
-  //   if (a) {
-  //     setAthletes([...a])
-  //   }
-  // }
+  
   const addCompletedTime = (time) => setCompletedTimes((times) => {
     const newTimes = [...times, time]
     if (typeof window !== 'undefined') {
@@ -337,13 +312,40 @@ const Home = () => {
     }
     return newTimes
   })
+  const createEvent = async data => {
+    const res = await usePost('createEvent', data)
+    setEvent(res.Item)
+
+    try {
+      usePost(
+        'createTimers',
+        completedTimes.map((time) => ({
+          ...time,
+          finished: true,
+          eventId: res.Item.key,
+        }))
+      ).then((res) => { 
+        console.log('saved')
+        clearLocalStorage()
+        router.push('/')
+    })
+    } catch (error) {
+      console.log('Failed in API call ', error)
+    }
+    
+  }
   return (
     <Layout>
+      {event && (
+        <h2 className='text-center'>
+          {event.name} - {new Date(event.date).toString()}
+        </h2>
+      )}
       <TrackTimes addCompletedTime={addCompletedTime} user={user} />
       <EventTimes times={completedTimes} />
-      {
-        user && completedTimes && <SaveForm user={user} />
-      }
+      {user && completedTimes && event==null && (
+        <SaveForm user={user} createEvent={createEvent} />
+      )}
     </Layout>
   )
 }

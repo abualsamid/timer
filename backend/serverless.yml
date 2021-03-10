@@ -144,6 +144,19 @@ functions:
           method: POST 
           path: /distance 
           authorizer: serviceAuthorizer
+  createTimers:
+    handler: functions/app.createTimers
+    events:
+      - httpApi:
+          method: POST
+          path: /createTimers 
+          authorizer: serviceAuthorizer
+    iamRoleStatements:
+      - Effect: Allow
+        Action: 
+          - dynamodb:PartiQLInsert
+          - dynamodb:PartiQLUpdate
+        Resource: !GetAtt DynamoTable.Arn
   createTimer:
     handler: functions/app.createTimer
     events:

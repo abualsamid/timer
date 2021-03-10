@@ -40,6 +40,30 @@ const extractUser = (event) => {
   return [claims.sub, claims.email]
 }
 
+const BatchInsert = async (Items, userId) => {
+  const _now = Date.now 
+  const Statements = Items.map( Item => {
+    Item.createdAt = _now 
+    Item.updateAt = _now 
+    const item = JSON.stringify(Item).replace(/"/g, "'")
+    const Statement = `insert into "${TableName}" value ${item}`
+    return({Statement})
+  })
+
+  try {
+    const res = await db.batchExecuteStatement({ Statements }).promise()
+    console.log('Batch Inserted Statement ', res, Statements)
+  } catch (error) {
+    console.log('error executing batch statements: ', Statements, error)    
+  }
+  try {
+    await updateCacheMarker(userId)
+  } catch (error) {
+    console.log('error updating cache marker in dynamo ', error)
+  }
+  return {message: "success"}
+
+}
 const Insert = async (Item,userId) => {
   const _now = Date.now() 
 
@@ -57,6 +81,11 @@ const Insert = async (Item,userId) => {
       .promise()
   } catch (error) {
     console.error('Insert error ', Statement, error )
+  }
+  try {
+    await updateCacheMarker(userId)
+  } catch (error) {
+    console.log('error updating cache marker in dynamo ', error)
   }
   return Item 
 
@@ -141,18 +170,30 @@ exports.createEvent = async event => {
     console.error(error)
   }
 }
+
+exports.createTimers = async event => {
+  try {
+    const data = JSON.parse(event.body)
+    const [userId, email] = extractUser(event)
+    const Items = data.map((item) => ({
+      ...item,
+      id: `${userId}-time`,
+      key: `${item.eventId}-${ulid.ulid()}`,
+    }))
+    return await BatchInsert(Items,userId)
+  } catch (error) {
+    console.log('error creating timers ', error)
+  }
+}
 exports.createTimer = async (event, context) => {
   try {
     const data = JSON.parse(event.body)
     
     const [id, email] = extractUser(event)
-    const _now = Date.now()
     const key = ulid.ulid()
 
     const Item = {
       ...data, 
-      createdAt: _now,
-      updatedAt: _now,
       id: `${id}-time`, 
       key: `${data.eventId}-${key}`
     }

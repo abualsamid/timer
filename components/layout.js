@@ -1,7 +1,17 @@
+import { AmplifySignOut } from '@aws-amplify/ui-react'
+import { Auth } from 'aws-amplify'
 import Head from 'next/head'
 import Link from 'next/link'
+import { useEffect, useState } from 'react'
 
 const Layout = ({children}) => {
+  const [user, setUser]  = useState(null)
+  useEffect(
+    async function checkUser() {
+      const u = await Auth.currentAuthenticatedUser()
+      setUser(u)
+    }
+  ,[])  
   return (
     <div className="container-fluid">
       <Head>
@@ -21,6 +31,10 @@ const Layout = ({children}) => {
               CoachTimer
             </a>
           </Link>
+          {
+            user ? <AmplifySignOut /> : <Link href='/login'><a>Sign Up/In</a></Link>
+          }
+          
         </div>
       </nav>
       <div className="my-3">

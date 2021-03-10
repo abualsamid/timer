@@ -8,5 +8,5 @@
       "@/lib/*": ["lib/*"]
     }
   },
-  "exclude": ["node_modules", "out", "public"]
+  "exclude": ["node_modules", "out", "public", "prod", ".git", ".vscode", "amplify"]
 }

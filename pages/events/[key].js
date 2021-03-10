@@ -233,13 +233,7 @@ const Home = () => {
 
   const { data: completedTimes, mutate } = useGet(`/getTimes/${eventId}`)
   const { data: event } = useGet(`/event/${eventId}`)
-  const addCompletedTime = (time) => {
-    mutate()
-    // do something clever with mutate here 
-    //  setCompletedTimes((times) => [...times, time])
-  }
   console.log('eventId ', eventId, 'completedTimes ', completedTimes, event )
-  const { data: athletes = { Items: [] } } = useGet('/getAthletes')
   return (
     <Layout>
       {event && (
@@ -251,11 +245,6 @@ const Home = () => {
 
       <br />
 
-      <TrackTimes
-        addCompletedTime={addCompletedTime}
-        athletes={athletes}
-        eventId={eventId}
-      />
       {completedTimes && <EventTimes times={completedTimes.Items} />}
     </Layout>
   )
