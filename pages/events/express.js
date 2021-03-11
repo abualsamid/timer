@@ -281,7 +281,7 @@ const clearLocalStorage = () => {
   typeof window !== 'undefined' &&
     window.localStorage.removeItem('coachTimer.completedTimes')
   typeof window !== 'undefined' &&
-    window.localStorage.removeItem('coachTimer.coachTimer.timers')
+    window.localStorage.removeItem('coachTimer.timers')
 }
 const Home = () => {
   const router = useRouter()

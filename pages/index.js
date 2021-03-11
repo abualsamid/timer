@@ -1,13 +1,30 @@
 import Layout from '@/components/layout'
+import { onAuthUIStateChange } from '@aws-amplify/ui-components'
+import { AmplifySignOut } from '@aws-amplify/ui-react'
+import { Auth } from 'aws-amplify'
 import Link from 'next/link'
+import { useEffect, useState } from 'react'
 
 
 
 const Home = () => {
-  
+  const [authState, setAuthState] = useState()
+  const [user, setUser] = useState(null)
+  useEffect(() => {
+    async function checkUser() {
+      const _u = await Auth.currentAuthenticatedUser()
+      setUser(_u)
+    }
+    checkUser()
+    return onAuthUIStateChange((nextAuthState, authData) => {
+      setAuthState(nextAuthState)
+      setUser(authData)
+    })
+  }, [])
   return (
-    <Layout>
-        <div className="m-2 p-2" style={{border: '1px'}}>
+    <>
+      <Layout>
+        <div className="m-2 p-2" style={{ border: '1px' }}>
           <span>
             Time athletes without any setup - results are not saved in database
           </span>
@@ -25,29 +42,11 @@ const Home = () => {
               Advanced Features (require free account)
             </h5>
             <br />
-
             <div className="card-text d-grid gap-3 col-6 mx-auto">
-              <Link href="/athletes">
-                <a className="btn btn-primary btn-lg p-auto">
-                  Add Athletes
-                  <br />
-                  <small>add athlete names to track their times</small>
-                </a>
-              </Link>
-              <Link href="/newEvent">
-                <a className="btn btn-lg btn-primary">
-                  Create New Event
-                  <br />
-                  <small>create an event and time athletes and races</small>
-                </a>
-              </Link>
               <Link href="/events">
                 <a className="btn btn-lg btn-primary">
-                  Access Past Events
+                  Results
                   <br />
-                  <small>
-                    Access recent events, to view results or to time new races
-                  </small>
                 </a>
               </Link>
               <Link href="/results/event">
@@ -55,20 +54,16 @@ const Home = () => {
                   Historical Results By Event
                 </a>
               </Link>
-              <Link href="/results/athlete">
-                <a className="btn btn-lg btn-primary">
-                  Historical Results By Athlete
-                </a>
-              </Link>
-              <Link href="/results/distance">
-                <a className="btn btn-lg btn-primary">
-                  Historical Results By Distance
-                </a>
-              </Link>
             </div>
           </div>
         </div>
-    </Layout>
+      </Layout>
+      <footer>
+        {user && (
+          <AmplifySignOut username={user.attributes.email}></AmplifySignOut>
+        )}
+      </footer>
+    </>
   )
 }
 export default Home
