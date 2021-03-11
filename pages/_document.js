@@ -31,10 +31,7 @@ export default class extends Document {
           <link rel="icon" href="/icons/logo-512x512.png" />
           <link rel="shortcut icon" href="/icons/favicon.ico" />
           <meta name="apple-mobile-web-app-status-bar" content="#90cdf4" />
-          <link
-            rel="stylesheet"
-            href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap"
-          />
+          
           <style>{`
             html, body, #__next {
               height: 100%;
