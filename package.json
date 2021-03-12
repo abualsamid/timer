@@ -3,10 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "postinstall": "husky install",
     "next": "next",
     "dev": "cp .env.development .env.local && next dev",
-    "build:qa": "git checkout main && cp .env.development .env.local && next build && next export",
+    "build:qa": "git commit -am 'build qa' && git push && cp .env.development .env.local && next build && next export",
     "deploy:qa": "yarn build:qa && pushd out && aws --region us-east-1 s3 sync --delete . s3://timer-20210220173156-hostingbucket-dev --exclude '*.DS_Store' --cache-control public,max-age=604800 && popd",
     "build:production": "git checkout production && git merge main && git push && cp .env.production .env.local && next build && next export -o prod",
     "deploy:production": "yarn build:production && pushd prod && aws --region us-east-1 s3 sync --delete . s3://timer-20210220173156-hostingbucket-production --exclude '*.DS_Store' --cache-control public,max-age=604800 && popd",

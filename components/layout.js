@@ -44,7 +44,6 @@ const Layout = ({children}) => {
           </Link>
           {user ? (
             <span>{user.attributes.email}</span>
-            
           ) : (
             <Link href="/login">
               <a className="btn btn-primary mr-auto p-auto">Sign Up / In</a>
@@ -53,7 +52,30 @@ const Layout = ({children}) => {
         </div>
       </nav>
       <div className="my-3">{children}</div>
-      
+      <nav className="navbar fixed-bottom navbar-light bg-light">
+        <div className="container-fluid">
+          <Link href="/events/express">
+            <a className="navbar-brand small-caps" href="#">
+              <i
+                className="bi-alarm"
+                style={{ fontSize: '1.2rem', color: 'cornflowerblue' }}
+              ></i>
+              <br />
+              Timer
+            </a>
+          </Link>
+          <Link href="/results/event">
+            <a className="navbar-brand small-caps" href="#">
+              <i
+                className="bi-journal-text"
+                style={{ fontSize: '1.2rem', color: 'cornflowerblue' }}
+              ></i>
+              <br />
+              Results
+            </a>
+          </Link>
+        </div>
+      </nav>
     </div>
   )
 }
