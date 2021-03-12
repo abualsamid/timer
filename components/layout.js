@@ -20,7 +20,6 @@ const Layout = ({children}) => {
     })
   }, [])
   
-  console.log('Layout ', Date.now())
   return (
     <div className="container-fluid">
       <Head>

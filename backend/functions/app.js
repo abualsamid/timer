@@ -52,7 +52,7 @@ const BatchInsert = async (Items, userId) => {
 
   try {
     const res = await db.batchExecuteStatement({ Statements }).promise()
-    console.log('Batch Inserted Statement ', res, Statements)
+    // console.log('Batch Inserted Statement ', res, Statements)
   } catch (error) {
     console.log('error executing batch statements: ', Statements, error)    
   }
@@ -180,7 +180,19 @@ exports.createTimers = async event => {
       id: `${userId}-time`,
       key: `${item.eventId}-${ulid.ulid()}`,
     }))
-    return await BatchInsert(Items,userId)
+    const athleteTimes = data.map(item => ({
+      ...item, 
+      id: `${userId}-athlete-time`,
+      key: `${item.name}-${ulid.ulid()}`
+    }))
+    const distances = data
+      .filter((item) => item.distance.length > 0)
+      .map((item) => ({
+        ...item,
+        id: `${userId}-distance-time`,
+        key: `${item.distance}-${ulid.ulid()}`,
+      }))
+    return await BatchInsert([...Items, ...athleteTimes, ...distances],userId)
   } catch (error) {
     console.log('error creating timers ', error)
   }

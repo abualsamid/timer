@@ -58,16 +58,11 @@ function TrackTimes({ addCompletedTime }) {
   const addTimer = (e) => {
     e.preventDefault()
     const elems = e.currentTarget.elements
-    const athlete = {
-      name:
-        elems.athlete.value.trim() || `Athlete ${timers.length + 1}`,
-      id: ulid(),
-    }
-    const name = `${athlete.name}`
+    
     const timer = {
       uid: ulid(),
-      name,
-      athlete,
+      distance: elems.distance.value.trim() || '',
+      name: elems.athlete.value.trim() || `Athlete ${timers.length + 1}`,
       started: false,
       finished: false,
       laps: [],
@@ -197,35 +192,36 @@ function TrackTimes({ addCompletedTime }) {
 }
 
 const Form = ({ addTimer }) => {
-  const [search, setSearch] = useState("")
-  const [picked, setPicked] = useState(false) 
-  const onClick = name => { setSearch(name); setPicked(true) }
   return (
     <form
       onSubmit={(e) => {
         addTimer(e)
-        setSearch('')
       }}
       autoComplete="off"
     >
       <div className="mb-3">
         <label htmlFor="athlete">Athlete's name</label>
-
         <input
           className="form-control"
           name="athlete"
           id="athlete"
           type="text"
           placeholder="Athlete Name"
-          value={search}
-          onChange={(e) => {
-            setPicked(false)
-            setSearch(e.target.value)
-          }}
           autoComplete="off"
         ></input>
       </div>
-      
+      <div className="mb-3">
+        <label htmlFor="athlete">distance</label>
+        <input
+          className="form-control"
+          name="distance"
+          id="distance"
+          type="text"
+          placeholder="distance"
+          
+          autoComplete="off"
+        ></input>
+      </div>
 
       <div className="d-grid gap-2">
         <button type="submit" className="btn btn-primary btn-lg">
@@ -255,25 +251,28 @@ const SaveForm = ({user, createEvent}) => {
     return false
   }
   return (
-    <form onSubmit={onSubmit}>
-      <div className="mb-3">
-        <label htmlFor="eventName">Event Name</label>
-        <input type="text" className="form-control" name="eventName" />
-      </div>
-      <div className="mb-3">
-        <label htmlFor="trackId">Track</label>
-        <input type="text" name="trackName" className="form-control" />
-      </div>
-      <div className="mb-3">
-        <label htmlFor="notes">Notes</label>
-        <input type="text" className="form-control" name="notes" />
-      </div>
-      <div className="d-grid">
-        <button className="btn btn-primary" type="submit">
-          Save to Database...
-        </button>
-      </div>
-    </form>
+    <div className="container">
+      <form onSubmit={onSubmit}>
+        <div className="mb-3">
+          <label htmlFor="eventName">Event Name</label>
+          <input type="text" className="form-control" name="eventName" />
+        </div>
+        <div className="mb-3">
+          <label htmlFor="trackId">Track</label>
+          <input type="text" name="trackName" className="form-control" />
+        </div>
+        <div className="mb-3">
+          <label htmlFor="notes">Notes</label>
+          <input type="text" className="form-control" name="notes" />
+        </div>
+        <div className="d-grid">
+          <button className="btn btn-primary" type="submit">
+            Save to Database...
+          </button>
+        </div>
+        <br/>
+      </form>
+    </div>
   )
 }
 
@@ -315,7 +314,7 @@ const Home = () => {
   const createEvent = async data => {
     const res = await usePost('createEvent', data)
     setEvent(res.Item)
-
+    console.log('createEvent completed times ', completedTimes)
     try {
       usePost(
         'createTimers',
@@ -327,7 +326,7 @@ const Home = () => {
       ).then((res) => { 
         console.log('saved')
         clearLocalStorage()
-        router.push('/')
+        // router.push('/')
     })
     } catch (error) {
       console.log('Failed in API call ', error)
@@ -337,13 +336,13 @@ const Home = () => {
   return (
     <Layout>
       {event && (
-        <h2 className='text-center'>
+        <h2 className="text-center">
           {event.name} - {new Date(event.date).toString()}
         </h2>
       )}
       <TrackTimes addCompletedTime={addCompletedTime} user={user} />
       <EventTimes times={completedTimes} />
-      {user && completedTimes && event==null && (
+      {user && completedTimes && completedTimes.length > 0 && event == null && (
         <SaveForm user={user} createEvent={createEvent} />
       )}
     </Layout>
