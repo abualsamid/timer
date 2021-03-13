@@ -42,22 +42,20 @@ const Layout = ({children}) => {
               CoachTimer
             </a>
           </Link>
-          {user && (
-            <small>{user.attributes.email}</small>
-          ) }
+          {user && <small>{user.attributes.email}</small>}
         </div>
       </nav>
-      <div className="my-3">{children}</div>
-      <nav className="navbar fixed-bottom navbar-light bg-light">
-        <div className="container-fluid">
+      <div>{children}</div>
+      <br />
+      <br />
+      <footer class="footer fixed-bottom my-auto py-100 bg-light">
+        <div class="container">
           <Link href="/events/express">
             <a className="navbar-brand small-caps" href="#">
               <i
                 className="bi-alarm"
                 style={{ fontSize: '1.2rem', color: 'cornflowerblue' }}
               ></i>
-              <br />
-              <small>Timer</small>
             </a>
           </Link>
           {user ? (
@@ -65,10 +63,8 @@ const Layout = ({children}) => {
               <a className="navbar-brand" href="#">
                 <i
                   className="bi-journal-text"
-                  style={{ fontSize: '1.2rem', color: 'cornflowerblue' }}
+                  style={{ fontSize: '1.2rem', color: 'green' }}
                 ></i>
-                <br />
-                <small>results</small>
               </a>
             </Link>
           ) : (
@@ -76,16 +72,53 @@ const Layout = ({children}) => {
               <a className="navbar-brand" href="#">
                 <i
                   className="bi-person"
-                  style={{ fontSize: '1.2rem', color: 'cornflowerblue' }}
+                  style={{ fontSize: '1.2rem', color: 'red' }}
                 ></i>
-                <br />
-                <small>Sign In/Up</small>
               </a>
             </Link>
           )}
-          <br />
         </div>
-      </nav>
+      </footer>
+      {/* <div className="container">
+        <nav className="navbar fixed-bottom navbar-light bg-light">
+          <div className="container-fluid">
+            <Link href="/events/express">
+              <a className="navbar-brand small-caps" href="#">
+                <i
+                  className="bi-alarm"
+                  style={{ fontSize: '1.2rem', color: 'cornflowerblue' }}
+                ></i>
+                <br />
+                <small>Timer</small>
+              </a>
+            </Link>
+            {user ? (
+              <Link href="/results/event">
+                <a className="navbar-brand" href="#">
+                  <i
+                    className="bi-journal-text"
+                    style={{ fontSize: '1.2rem', color: 'cornflowerblue' }}
+                  ></i>
+                  <br />
+                  <small>results</small>
+                </a>
+              </Link>
+            ) : (
+              <Link href="/login">
+                <a className="navbar-brand" href="#">
+                  <i
+                    className="bi-person"
+                    style={{ fontSize: '1.2rem', color: 'cornflowerblue' }}
+                  ></i>
+                  <br />
+                  <small>Sign In/Up</small>
+                </a>
+              </Link>
+            )}
+            <br />
+          </div>
+        </nav>
+      </div> */}
     </div>
   )
 }
