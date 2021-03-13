@@ -42,13 +42,9 @@ const Layout = ({children}) => {
               CoachTimer
             </a>
           </Link>
-          {user ? (
-            <span>{user.attributes.email}</span>
-          ) : (
-            <Link href="/login">
-              <a className="btn btn-primary mr-auto p-auto">Sign Up / In</a>
-            </Link>
-          )}
+          {user && (
+            <small>{user.attributes.email}</small>
+          ) }
         </div>
       </nav>
       <div className="my-3">{children}</div>
@@ -61,19 +57,33 @@ const Layout = ({children}) => {
                 style={{ fontSize: '1.2rem', color: 'cornflowerblue' }}
               ></i>
               <br />
-              Timer
+              <small>Timer</small>
             </a>
           </Link>
-          <Link href="/results/event">
-            <a className="navbar-brand small-caps" href="#">
-              <i
-                className="bi-journal-text"
-                style={{ fontSize: '1.2rem', color: 'cornflowerblue' }}
-              ></i>
-              <br />
-              Results
-            </a>
-          </Link>
+          {user ? (
+            <Link href="/results/event">
+              <a className="navbar-brand" href="#">
+                <i
+                  className="bi-journal-text"
+                  style={{ fontSize: '1.2rem', color: 'cornflowerblue' }}
+                ></i>
+                <br />
+                <small>results</small>
+              </a>
+            </Link>
+          ) : (
+            <Link href="/login">
+              <a className="navbar-brand" href="#">
+                <i
+                  className="bi-person"
+                  style={{ fontSize: '1.2rem', color: 'cornflowerblue' }}
+                ></i>
+                <br />
+                <small>Sign In/Up</small>
+              </a>
+            </Link>
+          )}
+          <br />
         </div>
       </nav>
     </div>
