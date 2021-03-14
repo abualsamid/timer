@@ -6,7 +6,7 @@ import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
 import { ulid } from 'ulid'
 
-function TrackTimes({ addCompletedTime }) {
+function TrackTimes({ addCompletedTime, updateActive }) {
   
   const [intervalId, setIntervalId] = useState(null)
   useEffect(() => {
@@ -21,6 +21,8 @@ function TrackTimes({ addCompletedTime }) {
   
   const saveStateToLocalStorage = (timers) => {
     setTimers(_timers => timers )
+    const active = timers.filter((timer) => !timer.finished).length
+    updateActive(active)
     try {
       if (typeof window !== 'undefined') {
         window.localStorage.setItem('coachTimer.timers', JSON.stringify(timers))
@@ -111,12 +113,13 @@ function TrackTimes({ addCompletedTime }) {
     timer.end = d
     timer.total = d - timer.start
     timer.finished = true
-
     saveStateToLocalStorage(timers.map((_timer) => (_timer.uid === uid ? timer : _timer)))
-
-
+    const remaining = timers.filter((timer) => !timer.finished).length
+    if (!remaining) {
+      stopUpdating()
+    }
     try {
-      addCompletedTime(timer)
+      addCompletedTime(timer, remaining)
     } catch (error) {
       console.log( error)
     }
@@ -127,10 +130,7 @@ function TrackTimes({ addCompletedTime }) {
     } catch (error) {
       console.log('error saving local storage.')
     }
-    const remaining = timers.filter((timer) => !timer.finished).length
-    if (!remaining) {
-      stopUpdating()
-    }
+    
 
   }
 
@@ -266,7 +266,7 @@ const SaveForm = ({user, createEvent}) => {
           <input type="text" className="form-control" name="notes" />
         </div>
         <div className="d-grid">
-          <button className="btn btn-primary" type="submit">
+          <button className="btn btn-primary btn-lg" type="submit">
             Save to Database...
           </button>
         </div>
@@ -285,6 +285,7 @@ const clearLocalStorage = () => {
 const Home = () => {
   const router = useRouter()
   const [event, setEvent] = useState(null)
+  const [active, setActive] = useState(0)
   const [completedTimes, setCompletedTimes] = useState(
     typeof window !== 'undefined'
       ? JSON.parse(
@@ -300,17 +301,20 @@ const Home = () => {
     }
     checkUser()
   },[])
-  
-  const addCompletedTime = (time) => setCompletedTimes((times) => {
-    const newTimes = [...times, time]
-    if (typeof window !== 'undefined') {
-      window.localStorage.setItem(
-        'coachTimer.completedTimes',
-        JSON.stringify(newTimes)
-      )
-    }
-    return newTimes
-  })
+  const updateActive = active => setActive(active)
+  const addCompletedTime = (time, active) => {
+    setCompletedTimes((times) => {
+      const newTimes = [...times, time]
+      if (typeof window !== 'undefined') {
+        window.localStorage.setItem(
+          'coachTimer.completedTimes',
+          JSON.stringify(newTimes)
+        )
+      }
+      return newTimes
+    })
+    setActive(active)
+  } 
   const createEvent = async data => {
     const res = await usePost('createEvent', data)
     setEvent(res.Item)
@@ -340,11 +344,13 @@ const Home = () => {
           {event.name} - {new Date(event.date).toString()}
         </h2>
       )}
-      <TrackTimes addCompletedTime={addCompletedTime} user={user} />
+      {user &&
+        completedTimes &&
+        completedTimes.length > 0 &&
+        event == null &&
+        !active && <SaveForm user={user} createEvent={createEvent} />}
+      <TrackTimes addCompletedTime={addCompletedTime} updateActive={updateActive} user={user} />
       <EventTimes times={completedTimes} />
-      {user && completedTimes && completedTimes.length > 0 && event == null && (
-        <SaveForm user={user} createEvent={createEvent} />
-      )}
     </Layout>
   )
 }

@@ -45,7 +45,8 @@ const Layout = ({children}) => {
           {user && <small>{user.attributes.email}</small>}
         </div>
       </nav>
-      <div>{children}</div>
+      <div className="container-fluid m-auto">{children}</div>
+      <br />
       <br />
       <br />
       <footer class="footer fixed-bottom my-auto py-100 bg-light">
