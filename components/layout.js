@@ -1,24 +1,8 @@
-import { onAuthUIStateChange } from '@aws-amplify/ui-components'
-import { Auth } from 'aws-amplify'
 import Head from 'next/head'
 import Link from 'next/link'
-import { useEffect, useState } from 'react'
 
 
-const Layout = ({children}) => {
-  const [authState, setAuthState] = useState()
-  const [user, setUser] = useState(null)
-  useEffect(() => {
-    async function checkUser() {
-      const _u =await Auth.currentAuthenticatedUser()
-      setUser(_u)
-    }
-    checkUser()
-    return onAuthUIStateChange((nextAuthState, authData) => {
-      setAuthState(nextAuthState)
-      setUser(authData)
-    })
-  }, [])
+const Layout = ({children, user}) => {
   
   return (
     <div className="container-fluid">
@@ -50,7 +34,7 @@ const Layout = ({children}) => {
       <br />
       <br />
       <nav className="navbar fixed-bottom navbar-light bg-light">
-        <div className='mx-auto'>
+        <div className="mx-auto">
           <ul className="navbar-nav list-group list-group-horizontal">
             <li className="nav-item mx-2">
               <Link href="/events/express">
@@ -62,17 +46,33 @@ const Layout = ({children}) => {
                 </a>
               </Link>
             </li>
-            <li className="nav-item mx-2">
-              {user ? (
-                <Link href="/results/event">
-                  <a className="nav-link">
-                    <i
-                      className="bi-journal-text"
-                      style={{ fontSize: '1.2rem', color: 'green' }}
-                    ></i>
-                  </a>
-                </Link>
-              ) : (
+            {
+              user ? (
+                <>
+                  <li className="nav-item mx-2">
+                    <Link href="/results/event">
+                        <a className="nav-link">
+                          <i
+                            className="bi-journal-text"
+                            style={{ fontSize: '1.2rem', color: 'green' }}
+                          ></i>
+                        </a>
+                    </Link>
+                  </li>
+                  <li className="nav-item mx-2">
+                    <Link href="/track">
+                        <a className="nav-link">
+                          <i
+                            className="bi-clipboard"
+                            style={{ fontSize: '1.2rem', color: 'green' }}
+                          ></i>
+                        </a>
+                    </Link>
+                  </li>
+                </>
+              )
+              :
+              <li className="nav-item mx-2">
                 <Link href="/login">
                   <a className="nav-link">
                     <i
@@ -81,51 +81,12 @@ const Layout = ({children}) => {
                     ></i>
                   </a>
                 </Link>
-              )}
-            </li>
+              </li>
+            }
+            
           </ul>
         </div>
       </nav>
-      {/* <div className="container">
-        <nav className="navbar fixed-bottom navbar-light bg-light">
-          <div className="container-fluid">
-            <Link href="/events/express">
-              <a className="navbar-brand small-caps" href="#">
-                <i
-                  className="bi-alarm"
-                  style={{ fontSize: '1.2rem', color: 'cornflowerblue' }}
-                ></i>
-                <br />
-                <small>Timer</small>
-              </a>
-            </Link>
-            {user ? (
-              <Link href="/results/event">
-                <a className="navbar-brand" href="#">
-                  <i
-                    className="bi-journal-text"
-                    style={{ fontSize: '1.2rem', color: 'cornflowerblue' }}
-                  ></i>
-                  <br />
-                  <small>results</small>
-                </a>
-              </Link>
-            ) : (
-              <Link href="/login">
-                <a className="navbar-brand" href="#">
-                  <i
-                    className="bi-person"
-                    style={{ fontSize: '1.2rem', color: 'cornflowerblue' }}
-                  ></i>
-                  <br />
-                  <small>Sign In/Up</small>
-                </a>
-              </Link>
-            )}
-            <br />
-          </div>
-        </nav>
-      </div> */}
     </div>
   )
 }

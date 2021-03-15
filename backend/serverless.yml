@@ -144,6 +144,31 @@ functions:
           method: POST 
           path: /distance 
           authorizer: serviceAuthorizer
+  logItem:
+    handler: functions/app.logItem
+    events:
+      - httpApi:
+          method: POST
+          path: /logItem
+          authorizer: serviceAuthorizer
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - dynamodb:PartiQLInsert
+          - dynamodb:PartiQLUpdate
+        Resource: !GetAtt DynamoTable.Arn
+  logItems:
+    handler: functions/app.logItems
+    events:
+      - httpApi:
+          method: GET
+          path: /logItems
+          authorizer: serviceAuthorizer
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - dynamodb:PartiQLSelect
+        Resource: !GetAtt DynamoTable.Arn
   createTimers:
     handler: functions/app.createTimers
     events:

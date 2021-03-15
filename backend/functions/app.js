@@ -147,6 +147,34 @@ const get = async ({id, key, userId}) => {
   }
 } 
 
+exports.logItems = async event => {
+   const [userId, email] = extractUser(event)
+   const cacheKey = `${userId}-workout`
+   return await get({ id: cacheKey, userId })
+}
+exports.logItem = async event => {
+  try {
+    const data = JSON.parse(event.body)
+    const [id, email] = extractUser(event)
+    const _now = Date.now()
+    const key = ulid.ulid()
+
+    const Item = {
+      ...data,
+      createdAt: _now,
+      updatedAt: _now,
+      id: `${id}-workout`,
+      key: `${data.workout}-${key}`,
+    }
+    await Insert(Item, id)
+    return {
+      Item,
+      message: 'logged workout',
+    }
+  } catch (error) {
+    console.error(error)
+  }
+}
 exports.createEvent = async event => {
   try {
     const data = JSON.parse(event.body)

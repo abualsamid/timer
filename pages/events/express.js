@@ -338,7 +338,7 @@ const Home = () => {
     
   }
   return (
-    <Layout>
+    <Layout user={user}>
       {event && (
         <h2 className="text-center">
           {event.name} - {new Date(event.date).toString()}
