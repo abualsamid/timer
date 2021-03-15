@@ -49,37 +49,43 @@ const Layout = ({children}) => {
       <br />
       <br />
       <br />
-      <footer class="footer fixed-bottom my-auto py-100 bg-light">
-        <div class="container">
-          <Link href="/events/express">
-            <a className="navbar-brand small-caps" href="#">
-              <i
-                className="bi-alarm"
-                style={{ fontSize: '1.2rem', color: 'cornflowerblue' }}
-              ></i>
-            </a>
-          </Link>
-          {user ? (
-            <Link href="/results/event">
-              <a className="navbar-brand" href="#">
-                <i
-                  className="bi-journal-text"
-                  style={{ fontSize: '1.2rem', color: 'green' }}
-                ></i>
-              </a>
-            </Link>
-          ) : (
-            <Link href="/login">
-              <a className="navbar-brand" href="#">
-                <i
-                  className="bi-person"
-                  style={{ fontSize: '1.2rem', color: 'red' }}
-                ></i>
-              </a>
-            </Link>
-          )}
+      <nav className="navbar fixed-bottom navbar-light bg-light">
+        <div className='mx-auto'>
+          <ul className="navbar-nav list-group list-group-horizontal">
+            <li className="nav-item mx-2">
+              <Link href="/events/express">
+                <a className="nav-link">
+                  <i
+                    className="bi-alarm"
+                    style={{ fontSize: '1.2rem', color: 'cornflowerblue' }}
+                  ></i>
+                </a>
+              </Link>
+            </li>
+            <li className="nav-item mx-2">
+              {user ? (
+                <Link href="/results/event">
+                  <a className="nav-link">
+                    <i
+                      className="bi-journal-text"
+                      style={{ fontSize: '1.2rem', color: 'green' }}
+                    ></i>
+                  </a>
+                </Link>
+              ) : (
+                <Link href="/login">
+                  <a className="nav-link">
+                    <i
+                      className="bi-person"
+                      style={{ fontSize: '1.2rem', color: 'red' }}
+                    ></i>
+                  </a>
+                </Link>
+              )}
+            </li>
+          </ul>
         </div>
-      </footer>
+      </nav>
       {/* <div className="container">
         <nav className="navbar fixed-bottom navbar-light bg-light">
           <div className="container-fluid">
