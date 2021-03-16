@@ -149,28 +149,52 @@ const get = async ({id, key, userId}) => {
 
 exports.logItems = async event => {
    const [userId, email] = extractUser(event)
+    const today = new Date()
+      .toISOString()
+      .replace(/-/g, '')
+      .substring(0, 8)
+  const { date = today } = event.pathParameters
+
    const cacheKey = `${userId}-workout`
-   return await get({ id: cacheKey, userId })
+   return await get({ id: cacheKey, key: date,  userId })
 }
 exports.logItem = async event => {
   try {
     const data = JSON.parse(event.body)
-    const [id, email] = extractUser(event)
-    const _now = Date.now()
+    const [userId, email] = extractUser(event)
+    const d = new Date()
+    const _now = d.valueOf()
+    const date= d
+        .toISOString()
+        .replace(/-/g, '')
+        .substring(0, 8)
+    const day = d.toDateString().substring(0, 3)
     const key = ulid.ulid()
-
+    const {athlete, workout } = data
+    
+    // insert data straight up.
     const Item = {
       ...data,
       createdAt: _now,
       updatedAt: _now,
-      id: `${id}-workout`,
-      key: `${data.workout}-${key}`,
+      day, 
+      date,
+      id: `${userId}-workout`,
+      key: `${athlete}-${workout}-${day}-${key}`,
     }
-    await Insert(Item, id)
-    return {
-      Item,
-      message: 'logged workout',
+    const byDay = {
+      ...Item, 
+      key: `${athlete}-${day}-${workout}-${key}`,
     }
+    const byAthletebyDate = {
+      ...Item, 
+      key: `${athlete}-${date}-${workout}-${key}`,
+    }
+    const byDate = {
+      ...Item,
+      key: `${date}-${athlete}-${workout}-${key}`,
+    }
+    return await BatchInsert([Item, byDay, byAthletebyDate, byDate], userId)
   } catch (error) {
     console.error(error)
   }
