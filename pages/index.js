@@ -92,7 +92,7 @@ const Home = () => {
         return
       }
 
-      await post('/notification', subscription)
+      await post('notification', subscription)
     }
 
   return (
