@@ -6,7 +6,9 @@
   "scripts": {
     "sls": "sls",
     "deploy": "sls deploy --verbose --debug",
-    "deploy:production": "sls deploy --stage production --verbose"
+    "deploy:production": "sls deploy --stage production --verbose",
+    "vapid": "web-push generate-vapid-keys"
+
   },
   "devDependencies": {
     "serverless": "2.27.0",
