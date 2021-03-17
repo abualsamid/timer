@@ -1,4 +1,5 @@
 import Layout from '@/components/layout'
+import { useUser } from '@/lib/auth'
 import { withAuthenticator } from '@aws-amplify/ui-react'
 import { useGet } from 'lib/fetch'
 import { EventTimes } from 'lib/timer'
@@ -12,7 +13,7 @@ const Home = () => {
   const { data: times } = useGet(() =>
     athleteId ? `/getTimeByAthlete/${athleteId}` : null
   )
-
+  const user = useUser()
   console.log(athletes, times )
   console.log('Res by Athlete ', Date.now())
 
@@ -20,7 +21,7 @@ const Home = () => {
     setAthleteId(e.currentTarget.value)
   }
   return (
-    <Layout>
+    <Layout user={user}>
       <div className="container">
         <h2>Historical results by athlete</h2>
         <select

@@ -1,6 +1,5 @@
 import Layout from '@/components/layout'
-import { onAuthUIStateChange } from '@aws-amplify/ui-components'
-import { Auth } from 'aws-amplify'
+import { useUser } from '@/lib/auth'
 import { post } from 'lib/fetch'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
@@ -19,47 +18,34 @@ const base64ToUint8Array = (base64) => {
 }
 
 const Home = () => {
-    const [authState, setAuthState] = useState()
-    const [user, setUser] = useState(null)
-    useEffect(() => {
-      async function checkUser() {
-        const _u = await Auth.currentAuthenticatedUser()
-        setUser(_u)
-      }
-      checkUser()
-      return onAuthUIStateChange((nextAuthState, authData) => {
-        setAuthState(nextAuthState)
-        setUser(authData)
-      })
-    }, [])
-
-    const [isSubscribed, setIsSubscribed] = useState(false)
-    const [subscription, setSubscription] = useState(null)
-    const [registration, setRegistration] = useState(null)
-    useEffect(() => {
-      if (
-        typeof window !== 'undefined' &&
-        'serviceWorker' in navigator &&
-        window.workbox !== undefined
-      ) {
-        // run only in browser
-        navigator.serviceWorker.ready.then((reg) => {
-          reg.pushManager.getSubscription().then((sub) => {
-            if (
-              sub &&
-              !(
-                sub.expirationTime &&
-                Date.now() > sub.expirationTime - 5 * 60 * 1000
-              )
-            ) {
-              setSubscription(sub)
-              setIsSubscribed(true)
-            }
-          })
-          setRegistration(reg)
+  const user = useUser()
+  const [isSubscribed, setIsSubscribed] = useState(false)
+  const [subscription, setSubscription] = useState(null)
+  const [registration, setRegistration] = useState(null)
+  useEffect(() => {
+    if (
+      typeof window !== 'undefined' &&
+      'serviceWorker' in navigator &&
+      window.workbox !== undefined
+    ) {
+      // run only in browser
+      navigator.serviceWorker.ready.then((reg) => {
+        reg.pushManager.getSubscription().then((sub) => {
+          if (
+            sub &&
+            !(
+              sub.expirationTime &&
+              Date.now() > sub.expirationTime - 5 * 60 * 1000
+            )
+          ) {
+            setSubscription(sub)
+            setIsSubscribed(true)
+          }
         })
-      }
-    }, [])
+        setRegistration(reg)
+      })
+    }
+  }, [])
 
     const subscribeButtonOnClick = async (event) => {
       event.preventDefault()

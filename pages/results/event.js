@@ -1,9 +1,9 @@
 import Layout from '@/components/layout'
 import { withAuthenticator } from '@aws-amplify/ui-react'
 import { formatDuration, intervalToDuration } from 'date-fns'
+import { useUser } from 'lib/auth'
 import { useGet } from 'lib/fetch'
 import { useState } from 'react'
-
 
 const TimerLables = ({ timer }) => {
   return (
@@ -81,11 +81,13 @@ const Home = () => {
   const { data: { Items:items = []} = {Items:[]} } = useGet('/getEvents')
   // const { data = { Items: [] } } = events
   // const { Items: items = [] } = data 
-  console.log('Home ', Date.now())
+  
+  const user = useUser()
+  console.log('Home ', Date.now(), user, items )
   
   const selectEvent = e => setEventId(e.currentTarget.value)
   return (
-    <Layout>
+    <Layout user={user}>
       <div className="container">
         <h2>Historical results by event</h2>
         <select

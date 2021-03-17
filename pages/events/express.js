@@ -1,5 +1,5 @@
-import { Auth } from 'aws-amplify'
 import Layout from 'components/layout'
+import { useUser } from 'lib/auth'
 import { usePost } from 'lib/fetch'
 import { EventTimes, TimerLabels } from 'lib/timer'
 import { useRouter } from 'next/router'
@@ -293,14 +293,8 @@ const Home = () => {
         )
       : []
   )
-  const [user, setUser] = useState(null)
-  useEffect(()=> {
-    async function checkUser() {
-      const u = await Auth.currentAuthenticatedUser()
-      setUser(u)
-    }
-    checkUser()
-  },[])
+  const user = useUser()
+  
   const updateActive = active => setActive(active)
   const addCompletedTime = (time, active) => {
     setCompletedTimes((times) => {

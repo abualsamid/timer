@@ -1,5 +1,6 @@
 
 import Layout from '@/components/layout'
+import { useUser } from '@/lib/auth'
 import { withAuthenticator } from '@aws-amplify/ui-react'
 import { ulid } from 'backend/node_modules/ulid/dist'
 import { useGet, usePost } from 'lib/fetch'
@@ -8,7 +9,7 @@ const Collator = new Intl.Collator('en')
 
 const Home = () => {
   const {data:athletes, loading, error, mutate} = useGet('/getAthletes')
-
+  const user = useUser()
   
   console.log(athletes, loading, error)
   const addAthlete = async e => {
@@ -32,7 +33,7 @@ const Home = () => {
     return false 
   }
   return (
-    <Layout>
+    <Layout user={user}>
       <div className="container">
         {athletes && !error && !loading &&  
           athletes.Items.sort(Collator.compare).map(

@@ -26,7 +26,7 @@ const Layout = ({children, user}) => {
               CoachTimer
             </a>
           </Link>
-          {user && <small>{user.attributes.email}</small>}
+          {user && <small>{user?.attributes?.email}</small>}
         </div>
       </nav>
       <div className="container-fluid m-auto">{children}</div>
@@ -36,12 +36,12 @@ const Layout = ({children, user}) => {
       <nav className="navbar fixed-bottom navbar-light bg-light">
         <div className="mx-auto">
           <ul className="navbar-nav list-group list-group-horizontal">
-            <li className="nav-item mx-2">
+            <li className="nav-item mx-4">
               <Link href="/events/express">
                 <a className="nav-link">
                   <i
                     className="bi-alarm"
-                    style={{ fontSize: '1.2rem', color: 'cornflowerblue' }}
+                    style={{ fontSize: '1.5rem', color: 'cornflowerblue' }}
                   ></i>
                 </a>
               </Link>
@@ -49,22 +49,22 @@ const Layout = ({children, user}) => {
             {
               user ? (
                 <>
-                  <li className="nav-item mx-2">
+                  <li className="nav-item mx-4">
                     <Link href="/results/event">
                         <a className="nav-link">
                           <i
                             className="bi-journal-text"
-                            style={{ fontSize: '1.2rem', color: 'green' }}
+                            style={{ fontSize: '1.5rem', color: 'green' }}
                           ></i>
                         </a>
                     </Link>
                   </li>
-                  <li className="nav-item mx-2">
+                  <li className="nav-item mx-4">
                     <Link href="/track">
                         <a className="nav-link">
                           <i
                             className="bi-clipboard"
-                            style={{ fontSize: '1.2rem', color: 'green' }}
+                            style={{ fontSize: '1.5rem', color: 'green' }}
                           ></i>
                         </a>
                     </Link>
@@ -72,12 +72,12 @@ const Layout = ({children, user}) => {
                 </>
               )
               :
-              <li className="nav-item mx-2">
+              <li className="nav-item mx-4">
                 <Link href="/login">
                   <a className="nav-link">
                     <i
                       className="bi-person"
-                      style={{ fontSize: '1.2rem', color: 'red' }}
+                      style={{ fontSize: '1.5rem', color: 'red' }}
                     ></i>
                   </a>
                 </Link>

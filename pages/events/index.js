@@ -1,4 +1,5 @@
 import Layout from '@/components/layout'
+import { useUser } from '@/lib/auth'
 import { withAuthenticator } from '@aws-amplify/ui-react'
 import { useGet } from 'lib/fetch'
 import Link from 'next/link'
@@ -8,9 +9,9 @@ const Collator = new Intl.Collator('en')
 const Home = () => {
   const { data: events, loading, error } = useGet('/getEvents')
   console.log(events)
-  
+  const user = useUser()
   return (
-    <Layout>
+    <Layout user={user}>
       <div className="container">
         <h3 className="text-center">Events</h3>
         <p>
