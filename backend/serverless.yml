@@ -65,6 +65,17 @@ custom:
     ignoreJWTSignature: true
   
 functions:
+  notification:
+    handler: functions/app.notification
+    events: 
+      - httpApi:  
+          method: POST 
+          path: /notification
+          authorizer: serviceAuthorizer
+    environment:
+      WEB_PUSH_EMAIL: ahmad@abualsamid.com
+      WEB_PUSH_PRIVATE_KEY: _MUORsiFdw0cJJMyFRpIxB9Xdzta6FxxsLOj1MFpv2g
+      WEB_PUSH_PUBLIC_KEY: BCS4gRLWoFfaVJI9nUvg5PSaRoH3eFmNzC97BKSfrsKqlW4xS_dHvAyN-Qgyur3zp07GbBGOu4m3dpAjRusU1vM
   getTimeByDistance:
     handler: functions/app.getTimeByDistance
     events:

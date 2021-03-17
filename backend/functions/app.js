@@ -6,6 +6,7 @@ const { TableName } = process.env
 const nodeCache = require('node-cache')
 const { unmarshall } = require('@aws-sdk/util-dynamodb')
 const cache = new nodeCache({stdTTL: 1200})
+const webPush = require('web-push')
 
 function slugify(str) {
   str = str.replace(/^\s+|\s+$/g, '')
@@ -424,7 +425,39 @@ exports.myProfile = async (event, context) => {
   }
 }
 
+exports.notification = async event => {
 
+  webPush.setVapidDetails(
+    `mailto:${process.env.WEB_PUSH_EMAIL}`,
+    process.env.WEB_PUSH_PUBLIC_KEY,
+    process.env.WEB_PUSH_PRIVATE_KEY
+  )
+
+  const subscription = JSON.parse(event.body)
+
+  try {
+    const response = await webPush
+    .sendNotification(
+      subscription,
+      JSON.stringify({
+        title: 'Hello Web Push',
+        message: 'Your web push notification is here!',
+      })
+    )
+    return response.body 
+  } catch (error) {
+    console.log(error)
+    if ('statusCode' in error) {
+      throw err.body 
+      // res.writeHead(err.statusCode, err.headers).end(err.body)
+    } else {
+      throw error 
+      // console.error(err)
+      // res.statusCode = 500
+    }
+  }
+  
+}
 exports.handler = event => {
   console.log(event)
 }
