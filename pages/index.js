@@ -130,23 +130,32 @@ const Home = () => {
         ) : (
           <Link href="/login">
             <a className="navbar-brand">
-              <i className="bi-person" style={{ color: 'red' }}></i>
+              <i
+                className="bi-person"
+                style={{ fontSize: '3em', color: 'red' }}
+              ></i>
             </a>
           </Link>
         )}
         <br />
-        <button onClick={subscribeButtonOnClick} disabled={isSubscribed}>
-          Subscribe
-        </button>
-        <button onClick={unsubscribeButtonOnClick} disabled={!isSubscribed}>
-          Unsubscribe
-        </button>
-        <button
-          onClick={sendNotificationButtonOnClick}
-          disabled={!isSubscribed}
-        >
-          Send Notification
-        </button>
+        {process.env.NODE_ENV === 'development' && (
+          <>
+            <button onClick={subscribeButtonOnClick} disabled={isSubscribed}>
+              Subscribe
+            </button>
+            <br/>
+            <button onClick={unsubscribeButtonOnClick} disabled={!isSubscribed}>
+              Unsubscribe
+            </button>
+            <br/>
+            <button
+              onClick={sendNotificationButtonOnClick}
+              disabled={!isSubscribed}
+            >
+              Send Notification
+            </button>
+          </>
+        )}
       </div>
     </Layout>
   )
