@@ -1,6 +1,7 @@
 import Layout from '@/components/layout'
 import { onAuthUIStateChange } from '@aws-amplify/ui-components'
 import { Auth } from 'aws-amplify'
+import { post } from 'lib/fetch'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 
@@ -91,15 +92,7 @@ const Home = () => {
         return
       }
 
-      await fetch('/api/notification', {
-        method: 'POST',
-        headers: {
-          'Content-type': 'application/json',
-        },
-        body: JSON.stringify({
-          subscription,
-        }),
-      })
+      await post('/api/notification', subscription)
     }
 
   return (
