@@ -1,6 +1,48 @@
 import Layout from "@/components/layout"
 import { useUser } from "@/lib/auth"
 import { useGet, usePost } from "@/lib/fetch"
+
+const reducer = (accumulator, currentValue) => 1*accumulator + 1*currentValue
+
+const DataByAthlete = ({items, athlete}) => {
+
+  const workouts = [...new Set(items.map(({workout}) => workout))]
+  return <div>
+    {
+      workouts.map(
+        workout => (
+          <div key='workout'>
+            <strong>{workout} : </strong>
+            {
+              items.filter(item => item.workout===workout && item.athlete===athlete).map(({value}) => value).reduce(reducer)
+            }
+          </div>
+
+        )
+      )
+    }
+  </div>
+}
+
+const DataByDate = ({ items, date }) => {
+  const athletes = new Set()
+  items.forEach(({athlete}) => athletes.add(athlete))
+
+  return <div>
+    {
+      Array.from(athletes).map(
+        athlete => (
+          <div>
+            <h4>{athlete}</h4>
+            <DataByAthlete items={items.filter(i => i.athlete===athlete)} athlete={athlete} />
+          </div>
+
+        )
+      )
+    }
+  </div>
+}
+
 const Track = () => {
   const user = useUser()
   const today = new Date()
@@ -8,7 +50,15 @@ const Track = () => {
     .replace(/-/g, '')
     .substring(0, 8)
   const {data: {Items:items} = {Items:[]}, mutate} = useGet(`/logItems/${today}`)
-  
+  const athletes = new Set()
+  const dates = new Set() 
+  items.forEach(
+    ({athlete,date}) => {
+      athletes.add(athlete)
+      dates.add(date)
+    }
+  )
+
   const onSubmit = async e => {
     e.preventDefault()
     const elems = e.currentTarget.elements
@@ -24,6 +74,7 @@ const Track = () => {
     const res = await usePost('logItem', data)
     mutate()
     console.log(res)
+    elems.value.value=''
     return false
   }
   return (
@@ -72,19 +123,15 @@ const Track = () => {
           </button>
         </div>
       </form>
-      <div>
-        
-        {
-          items.map(
-            ({athlete, workout, date, day, value, key}) => <div>
-              {athlete} : {date} : {day} 
-              <br/>
-              {workout} : {value}
+      <div className='m-auto container py-3'>
+        {dates &&
+          Array.from(dates).map((date) => (
+            <div>
+              <h4>{date}</h4>
+              <DataByDate date={date} items={items
+                .filter((item) => item.date == date)} />
             </div>
-            
-              
-          )
-        }
+          ))}
       </div>
     </Layout>
   )
