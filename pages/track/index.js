@@ -1,6 +1,7 @@
 import Layout from "@/components/layout"
 import { useUser } from "@/lib/auth"
 import { useGet, usePost } from "@/lib/fetch"
+import { useState } from "react"
 
 const reducer = (accumulator, currentValue) => 1*accumulator + 1*currentValue
 
@@ -11,7 +12,7 @@ const DataByAthlete = ({items, athlete}) => {
     {
       workouts.map(
         workout => (
-          <div key='workout'>
+          <div key={workout}>
             <strong>{workout} : </strong>
             {
               items.filter(item => item.workout===workout && item.athlete===athlete).map(({value}) => value).reduce(reducer)
@@ -43,12 +44,16 @@ const DataByDate = ({ items, date }) => {
   </div>
 }
 
+const pad = n => n<10?`0${n}`:n
+const displayDate= (date) => new Date(`${date.substring(0,4)}-${date.substring(4,6)}-${date.substring(6,8)}`).toLocaleDateString()
 const Track = () => {
+  const [disabled, setDisabled] = useState("")
   const user = useUser()
-  const today = new Date()
-    .toISOString()
-    .replace(/-/g, '')
-    .substring(0, 8)
+  const Now = new Date()
+  const year = Now.getFullYear()
+  const month = Now.getMonth()+1
+  const day = Now.getDate()
+  const today = `${year}${pad(month)}${pad(day)}`
   const {data: {Items:items} = {Items:[]}, mutate} = useGet(`/logItems/${today}`)
   const athletes = new Set()
   const dates = new Set() 
@@ -61,6 +66,7 @@ const Track = () => {
 
   const onSubmit = async e => {
     e.preventDefault()
+    setDisabled("disabled")
     const elems = e.currentTarget.elements
     const athlete = elems.athlete.value.trim() || "me"
     const workout = elems.workout.value.trim()
@@ -75,6 +81,7 @@ const Track = () => {
     mutate()
     console.log(res)
     elems.value.value=''
+    setDisabled("")
     return false
   }
   return (
@@ -118,18 +125,24 @@ const Track = () => {
         </div>
 
         <div className="d-grid gap-2">
-          <button type="submit" className="btn btn-primary btn-lg">
+          <button
+            type="submit"
+            className={`btn btn-primary btn-lg ${disabled}`}
+          >
             Log Item
           </button>
         </div>
       </form>
-      <div className='m-auto container py-3'>
+      <div className="m-auto container py-3">
         {dates &&
-          Array.from(dates).map((date) => (
+          Array.from(dates).map((date, i) => (
             <div>
-              <h4>{date}</h4>
-              <DataByDate date={date} items={items
-                .filter((item) => item.date == date)} />
+              <h4>{date && displayDate(date)}</h4>
+              <DataByDate
+                date={date}
+                key={i}
+                items={items.filter((item) => item.date == date)}
+              />
             </div>
           ))}
       </div>

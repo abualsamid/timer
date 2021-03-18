@@ -136,7 +136,7 @@ const get = async ({id, key, userId, after}) => {
   let res = cache.get(cacheKey)
   if (res == undefined || _canUseCache==false ) {
     const Statement = key
-      ? (after ? `select * from "${TableName}" where "id"='${id}' and "key">='${key}' order by "key" desc` : `select * from "${TableName}" where "id"='${id}' and begins_with("key",'${key}') order by "key" desc`)
+      ? (after ? `select * from "${TableName}" where "id"='${id}' and "key">='${key}' ` : `select * from "${TableName}" where "id"='${id}' and begins_with("key",'${key}') order by "key" desc`)
       : `select * from "${TableName}" where "id"='${id}' order by "key" desc`
     res = await db.executeStatement({ Statement }).promise()
     res.Items = res.Items.map((item) => unmarshall(item))
@@ -183,19 +183,22 @@ exports.logItem = async event => {
       updatedAt: _now,
       day, 
       date,
-      id: `${userId}-workout`,
+      id: `${userId}-workout-a`, // athlete
       key: `${athlete}-${workout}-${day}-${key}`,
     }
     const byDay = {
-      ...Item, 
+      ...Item,
+      id: `${userId}-workout-a-day`,
       key: `${athlete}-${day}-${workout}-${key}`,
     }
     const byAthletebyDate = {
-      ...Item, 
+      ...Item,
+      id: `${userId}-workout-a-date`,
       key: `${athlete}-${date}-${workout}-${key}`,
     }
     const byDate = {
       ...Item,
+      id: `${userId}-workout`,
       key: `${date}-${athlete}-${workout}-${key}`,
     }
     return await BatchInsert([Item, byDay, byAthletebyDate, byDate], userId)
