@@ -129,14 +129,16 @@ const canUseCache = async userId => {
   }
   return false 
 }
-const get = async ({id, key, userId, after}) => {
-  const cacheKey = key ? `${id}-${key}` : id
+const get = async ({id, key, userId, startDate, endDate}) => {
+  const cacheKey = key ? (startDate ? `${id}-${key}-${startDate}` : `${id}-${key}`) : id
 
   const _canUseCache = await canUseCache(userId)
   let res = cache.get(cacheKey)
   if (res == undefined || _canUseCache==false ) {
     const Statement = key
-      ? (after ? `select * from "${TableName}" where "id"='${id}' and "key">='${key}' ` : `select * from "${TableName}" where "id"='${id}' and begins_with("key",'${key}') order by "key" desc`)
+      ? startDate
+        ? `select * from "${TableName}" where "id"='${id}' and begins_with("key",'${key}') and "date" between '${startDate}' and '${endDate}' `
+        : `select * from "${TableName}" where "id"='${id}' and begins_with("key",'${key}') order by "key" desc`
       : `select * from "${TableName}" where "id"='${id}' order by "key" desc`
     res = await db.executeStatement({ Statement }).promise()
     res.Items = res.Items.map((item) => unmarshall(item))
@@ -160,7 +162,7 @@ exports.logItems = async event => {
   const day = date.substring(6, 8)
   const lastWeek = new Date(`${year}-${month}-${day}`) - 7 * 24 * 60 * 60 * 1000
    const cacheKey = `${userId}-workout`
-   return await get({ id: cacheKey, key: date,  userId, after: true })
+   return await get({ id: cacheKey, key: date,  userId, startDate: lastWeek, endDate: date })
 }
 exports.logItem = async event => {
   try {

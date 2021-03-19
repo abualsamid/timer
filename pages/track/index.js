@@ -5,37 +5,52 @@ import { useState } from "react"
 
 const reducer = (accumulator, currentValue) => 1*accumulator + 1*currentValue
 
-const DataByAthlete = ({items, athlete}) => {
+const DataByAthlete = ({items, athlete, date}) => {
 
   const workouts = [...new Set(items.map(({workout}) => workout))]
-  return <div>
-    {
-      workouts.map(
-        workout => (
-          <div key={workout}>
-            <strong>{workout} : </strong>
-            {
-              items.filter(item => item.workout===workout && item.athlete===athlete).map(({value}) => value).reduce(reducer)
+  console.log('DataByAthlete ', athlete, date, workouts, items)
+  return (
+    <div>
+      {workouts.map((workout) => (
+        <div key={workout}>
+          <strong>{workout} : </strong>
+          {items
+            .filter(
+              (item) =>
+                item.workout === workout &&
+                item.athlete === athlete &&
+                item.date === date
+            )
+            .map(({ value }) => value)
+            .reduce(reducer)}{' '}
+          <strong className="mx-4 px-4">
+            
+            {items
+              .filter(
+                (item) => item.workout === workout && item.athlete === athlete
+              )
+              .map(({ value }) => value)
+              .reduce(reducer)
             }
-          </div>
-
-        )
-      )
-    }
-  </div>
+            
+          </strong>
+        </div>
+      ))}
+    </div>
+  )
 }
 
 const DataByDate = ({ items, date }) => {
-  const athletes = new Set()
-  items.forEach(({athlete}) => athletes.add(athlete))
+  const athletes = [...new Set(items.map(({ athlete }) => athlete))]
 
+  console.log('DataByDate ', athletes)
   return <div>
     {
-      Array.from(athletes).map(
+      [...athletes].map(
         athlete => (
           <div>
             <h4>{athlete}</h4>
-            <DataByAthlete items={items.filter(i => i.athlete===athlete)} athlete={athlete} />
+            <DataByAthlete items={items.filter(i => i.athlete===athlete)} athlete={athlete} date={date} />
           </div>
 
         )
@@ -45,9 +60,10 @@ const DataByDate = ({ items, date }) => {
 }
 
 const pad = n => n<10?`0${n}`:n
-const displayDate= (date) => new Date(`${date.substring(0,4)}-${date.substring(4,6)}-${date.substring(6,8)}`).toLocaleDateString()
+const displayDate= (date) => `${date.substring(0,4)}-${date.substring(4,6)}-${date.substring(6,8)}`
 const Track = () => {
   const [disabled, setDisabled] = useState("")
+  const [message, setMessage] = useState("")
   const user = useUser()
   const Now = new Date()
   const year = Now.getFullYear()
@@ -77,6 +93,7 @@ const Track = () => {
       value,
       
     }
+    setMessage(`*** ${athlete} - ${workout} - ${value} ***`)
     const res = await usePost('logItem', data)
     mutate()
     console.log(res)
@@ -133,6 +150,8 @@ const Track = () => {
           </button>
         </div>
       </form>
+      <br />
+      {message && <div className="m-auto container">{message}</div>}
       <div className="m-auto container py-3">
         {dates &&
           Array.from(dates).map((date, i) => (
@@ -141,8 +160,9 @@ const Track = () => {
               <DataByDate
                 date={date}
                 key={i}
-                items={items.filter((item) => item.date == date)}
+                items={items}
               />
+              <hr/>
             </div>
           ))}
       </div>
