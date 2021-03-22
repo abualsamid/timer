@@ -8,7 +8,6 @@ const reducer = (accumulator, currentValue) => 1*accumulator + 1*currentValue
 const DataByAthlete = ({items, athlete, date}) => {
 
   const workouts = [...new Set(items.map(({workout}) => workout))]
-  console.log('DataByAthlete ', athlete, date, workouts, items)
   return (
     <div>
       {workouts.map((workout) => (
@@ -22,7 +21,7 @@ const DataByAthlete = ({items, athlete, date}) => {
                 item.date === date
             )
             .map(({ value }) => value)
-            .reduce(reducer)}{' '}
+            .reduce(reducer,0)}{' '}
           <strong className="mx-4 px-4">
             
             {items
@@ -30,7 +29,7 @@ const DataByAthlete = ({items, athlete, date}) => {
                 (item) => item.workout === workout && item.athlete === athlete
               )
               .map(({ value }) => value)
-              .reduce(reducer)
+              .reduce(reducer,0)
             }
             
           </strong>
@@ -71,14 +70,9 @@ const Track = () => {
   const day = Now.getDate()
   const today = `${year}${pad(month)}${pad(day)}`
   const {data: {Items:items} = {Items:[]}, mutate} = useGet(`/logItems/${today}`)
-  const athletes = new Set()
-  const dates = new Set() 
-  items.forEach(
-    ({athlete,date}) => {
-      athletes.add(athlete)
-      dates.add(date)
-    }
-  )
+  const athletes = new Set([...items.map(({athlete})=>athlete)])
+  const dates = new Set([...items.map(({ date }) => date)]) 
+  
 
   const onSubmit = async e => {
     e.preventDefault()

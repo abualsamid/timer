@@ -137,9 +137,10 @@ const get = async ({id, key, userId, startDate, endDate}) => {
   if (res == undefined || _canUseCache==false ) {
     const Statement = key
       ? startDate
-        ? `select * from "${TableName}" where "id"='${id}' and begins_with("key",'${key}') and "date" between '${startDate}' and '${endDate}' `
+        ? `select * from "${TableName}" where "id"='${id}' and "key" >= '${startDate}' and "date" between '${startDate}' and '${endDate}' order by "key" desc`
         : `select * from "${TableName}" where "id"='${id}' and begins_with("key",'${key}') order by "key" desc`
       : `select * from "${TableName}" where "id"='${id}' order by "key" desc`
+    // console.log('get::Statement ', Statement)  
     res = await db.executeStatement({ Statement }).promise()
     res.Items = res.Items.map((item) => unmarshall(item))
     cache.set(cacheKey, res)
@@ -150,6 +151,7 @@ const get = async ({id, key, userId, startDate, endDate}) => {
   }
 } 
 
+const lastWeek = x => { x.setDate(x.getDate()-7) ; return x }
 exports.logItems = async event => {
    const [userId, email] = extractUser(event)
     const today = new Date()
@@ -160,9 +162,9 @@ exports.logItems = async event => {
   const year = date.substring(0,4)
   const month = date.substring(4, 6)
   const day = date.substring(6, 8)
-  const lastWeek = new Date(`${year}-${month}-${day}`) - 7 * 24 * 60 * 60 * 1000
+  const startDate = lastWeek( new Date(`${year}-${month}-${day}`)).toISOString().replace(/-/g, '').substring(0,8)
    const cacheKey = `${userId}-workout`
-   return await get({ id: cacheKey, key: date,  userId, startDate: lastWeek, endDate: date })
+   return await get({ id: cacheKey, key: date,  userId, startDate, endDate: date })
 }
 exports.logItem = async event => {
   try {
@@ -201,7 +203,7 @@ exports.logItem = async event => {
     const byDate = {
       ...Item,
       id: `${userId}-workout`,
-      key: `${date}-${athlete}-${workout}-${key}`,
+      key: `${date}-${key}`,
     }
     return await BatchInsert([Item, byDay, byAthletebyDate, byDate], userId)
   } catch (error) {
