@@ -24,7 +24,7 @@ const TimerLables = ({ timer }) => {
       {timer.laps &&
         timer.laps.map((lap, i) => {
           return (
-            <div>
+            <div key={i}>
               lap {i + 1}:{' '}
               {formatDuration(
                 intervalToDuration({
@@ -55,17 +55,16 @@ const TimerLables = ({ timer }) => {
 const HistoricalData = () => {
   const historicalData = useGet('getTimes')
   const { data } = historicalData
-  console.log(historicalData.data)
   return (
     <div className="container">
       <div className="row m-3">
         {data &&
           data.Items &&
           data.Items.length > 0 &&
-          data.Items.map((timer) => {
+          data.Items.map((timer, i) => {
             return (
               <>
-                <TimerLables timer={timer} />
+                <TimerLables timer={timer}  key={i}/>
                 <hr />
               </>
             )

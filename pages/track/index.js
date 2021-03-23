@@ -5,57 +5,63 @@ import { useState } from "react"
 
 const reducer = (accumulator, currentValue) => 1*accumulator + 1*currentValue
 
-const DataByAthlete = ({items, athlete, date}) => {
+const DataByAthlete = ({items, athlete, date, counter}) => {
 
   const workouts = [...new Set(items.map(({workout}) => workout))]
   return (
-    <div>
+    <div className='my-3'>
       {workouts.map((workout) => (
-        <div key={workout}>
-          <strong>{workout} : </strong>
-          {items
-            .filter(
-              (item) =>
-                item.workout === workout &&
-                item.athlete === athlete &&
-                item.date === date
-            )
-            .map(({ value }) => value)
-            .reduce(reducer,0)}{' '}
-          <strong className="mx-4 px-4">
-            
+        <div className="row" key={workout}>
+          <div className="col">
+            <strong>{workout} : </strong>
             {items
               .filter(
-                (item) => item.workout === workout && item.athlete === athlete
+                (item) =>
+                  item.workout === workout &&
+                  item.athlete === athlete &&
+                  item.date === date
               )
               .map(({ value }) => value)
-              .reduce(reducer,0)
-            }
-            
-          </strong>
+              .reduce(reducer, 0)}{' '}
+          </div>
+          <div className="col">
+            {counter == '0' && (
+              <strong className="mx-4 px-4">
+                {items
+                  .filter(
+                    (item) =>
+                      item.workout === workout && item.athlete === athlete
+                  )
+                  .map(({ value }) => value)
+                  .reduce(reducer, 0)
+                  .toFixed(2)}
+              </strong>
+            )}
+          </div>
         </div>
       ))}
     </div>
   )
 }
 
-const DataByDate = ({ items, date }) => {
+const DataByDate = ({ items, date, counter }) => {
   const athletes = [...new Set(items.map(({ athlete }) => athlete))]
 
-  console.log('DataByDate ', athletes)
-  return <div>
-    {
-      [...athletes].map(
-        athlete => (
-          <div>
-            <h4>{athlete}</h4>
-            <DataByAthlete items={items.filter(i => i.athlete===athlete)} athlete={athlete} date={date} />
-          </div>
-
-        )
-      )
-    }
-  </div>
+  return (
+    <div>
+      {[...athletes].map((athlete,i) => (
+        <div key={i}>
+          <h4>{athlete}</h4>
+          <DataByAthlete
+            items={items.filter((i) => i.athlete === athlete)}
+            athlete={athlete}
+            date={date}
+            counter={counter}
+          />
+        </div>
+      ))}
+    </div>
+  )
 }
 
 const pad = n => n<10?`0${n}`:n
@@ -102,10 +108,8 @@ const Track = () => {
           <input
             type="text"
             className="form-control"
-            className="form-control"
             name="athlete"
             id="athlete"
-            type="text"
             placeholder="Athlete Name"
             autoComplete="off"
           />
@@ -114,22 +118,18 @@ const Track = () => {
           <input
             type="text"
             className="form-control"
-            className="form-control"
             name="workout"
             id="workout"
-            type="text"
             placeholder="Workout"
             autoComplete="off"
           />
         </div>
         <div className="mb-3">
           <input
-            type="text"
-            className="form-control"
             className="form-control"
             name="value"
             id="value"
-            type="text"
+            type="number"
             placeholder="Value"
             autoComplete="off"
           />
@@ -149,11 +149,11 @@ const Track = () => {
       <div className="m-auto container py-3">
         {dates &&
           Array.from(dates).map((date, i) => (
-            <div>
+            <div key={i}>
               <h4>{date && displayDate(date)}</h4>
               <DataByDate
                 date={date}
-                key={i}
+                counter={i}
                 items={items}
               />
               <hr/>

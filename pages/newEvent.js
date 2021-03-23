@@ -22,7 +22,6 @@ const Home = () => {
       date: new Date()
     }
     const res = await usePost('createEvent', data)
-    console.log(res)
     router.push(`/events/${res.Item.key}`)
     return false 
   }

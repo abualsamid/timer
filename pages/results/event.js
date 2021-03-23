@@ -83,7 +83,6 @@ const Home = () => {
   // const { Items: items = [] } = data 
   
   const user = useUser()
-  console.log('Home ', Date.now(), user, items )
   
   const selectEvent = e => setEventId(e.currentTarget.value)
   return (
