@@ -147,35 +147,41 @@ function TrackTimes({ addCompletedTime, updateActive }) {
             return (
               <div className="row m-3 card" key={i}>
                 <TimerLabels timer={timer} />
-                <div>
+                <ul className="nav nav-justified my-2">
                   {!timer.started && !timer.finished && (
-                    <button
-                      type="button"
-                      className="btn-primary btn m-2"
-                      onClick={(e) => startTimer(timer.uid)}
-                    >
-                      Start
-                    </button>
+                    <li className="nav-item">
+                      <button
+                        type="button"
+                        className="btn-primary btn btn-lg p-3"
+                        onClick={(e) => startTimer(timer.uid)}
+                      >
+                        Start
+                      </button>
+                    </li>
                   )}
                   {timer.started && !timer.finished && (
-                    <button
-                      type="button"
-                      className="btn-primary btn m-2"
-                      onClick={(e) => lapTimer(timer.uid)}
-                    >
-                      Lap
-                    </button>
+                    <li className="nav-item">
+                      <button
+                        type="button"
+                        className="btn-primary btn btn-lg p-3"
+                        onClick={(e) => lapTimer(timer.uid)}
+                      >
+                        Lap
+                      </button>
+                    </li>
                   )}
                   {timer.started && !timer.finished && (
-                    <button
-                      type="button"
-                      className="btn-danger btn m-2"
-                      onClick={(e) => finishTimer(timer.uid)}
-                    >
-                      Finish
-                    </button>
+                    <li className="nav-item">
+                      <button
+                        type="button"
+                        className="btn-danger btn btn-lg p-3"
+                        onClick={(e) => finishTimer(timer.uid)}
+                      >
+                        Finish
+                      </button>
+                    </li>
                   )}
-                </div>
+                </ul>
               </div>
             )
           })}

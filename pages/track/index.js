@@ -130,6 +130,7 @@ const Track = () => {
             name="value"
             id="value"
             type="number"
+						step="any"
             placeholder="Value"
             autoComplete="off"
           />

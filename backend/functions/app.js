@@ -151,7 +151,7 @@ const get = async ({id, key, userId, startDate, endDate}) => {
   }
 } 
 
-const lastWeek = x => { x.setDate(x.getDate()-7) ; return x }
+const lastWeek = (x, lookBack) => { x.setDate(x.getDate()-lookBack) ; return x }
 exports.logItems = async event => {
    const [userId, email] = extractUser(event)
     const today = new Date()
@@ -162,7 +162,16 @@ exports.logItems = async event => {
   const year = date.substring(0,4)
   const month = date.substring(4, 6)
   const day = date.substring(6, 8)
-  const startDate = lastWeek( new Date(`${year}-${month}-${day}`)).toISOString().replace(/-/g, '').substring(0,8)
+  const dayNumber = new Date(`${year}-${month}-${day}`).getDay()
+  const lookBack = dayNumber == 6 ? 0 : dayNumber + 1 
+  //  0 = Sunday => -1
+  //  1 = Monday => -2
+  //  2 = Tuesday => -3 
+  //  3 = Wed => -4 
+  //  4 = Thur => -5 
+  //  5 = Friday => -6 
+  //  6 = Saturday => 0 
+  const startDate = lastWeek( new Date(`${year}-${month}-${day}`), lookBack).toISOString().replace(/-/g, '').substring(0,8)
    const cacheKey = `${userId}-workout`
    return await get({ id: cacheKey, key: date,  userId, startDate, endDate: date })
 }
