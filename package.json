@@ -8,7 +8,7 @@
     "build:qa": "git commit -am 'build qa'; git push && cp .env.development .env.local && next build && next export",
     "deploy:qa": "yarn build:qa && pushd out && aws --region us-east-1 s3 sync --delete . s3://timer-20210220173156-hostingbucket-dev --exclude '*.DS_Store' --cache-control public,max-age=86400 && popd",
     "build:production": "git checkout production && git merge main && git push && cp .env.production .env.local && next build && next export -o prod",
-    "deploy:production": "yarn build:production && pushd prod && aws --region us-east-1 s3 sync --delete . s3://timer-20210220173156-hostingbucket-production --exclude '*.DS_Store' --cache-control public,max-age=604800 && popd",
+    "deploy:production": "yarn build:production && pushd prod && aws --region us-east-1 s3 sync --delete . s3://timer-20210220173156-hostingbucket-production --exclude '*.DS_Store' --cache-control public,max-age=172800 && popd",
     "postdeploy:production": "git checkout main && aws cloudfront create-invalidation --distribution-id E1BZVOCOG1PQ45 --paths \"/*\"",
     "start": "next start"
   },
@@ -20,12 +20,12 @@
     "bootstrap": "^5.0.0-beta2",
     "date-fns": "^2.17.0",
     "global": "^4.4.0",
-    "next": "^10.0.8",
+    "next": "latest",
     "react": "17.0.1",
     "react-dom": "17.0.1",
-    "swr": "^0.4.2",
-    "ulid": "^2.3.0",
-    "next-pwa": "^5.0.6"
+    "swr": "latest",
+    "ulid": "latest",
+    "next-pwa": "latest"
   },
   "devDependencies": {
   }
